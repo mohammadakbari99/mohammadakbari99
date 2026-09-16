@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>بازی حکم آنلاین</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: #0f381e;
+      font-family: Tahoma, sans-serif;
+      color: #fff;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      height: 100%;
+      margin: 0 auto;
+      background: radial-gradient(circle, #1b5e20 0%, #0d3b12 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    /* نوار بالا */
+    #topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      background: rgba(0,0,0,0.3);
+      font-size: 14px;
+    }
+    .score-pill {
+      background: rgba(255,255,255,0.1);
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    /* میز بازی و وسط زمین */
+    #table-area {
+      flex: 1;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #trick-area { 
+      position: absolute; 
+      top: 45%; 
+      left: 50%; 
+      transform: translate(-50%, -50%); 
+      width: 160px; 
+      height: 120px; 
+    }
+
+    .played-south { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); animation: smoothPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .played-west { position: absolute; left: 0; top: 50%; transform: translateY(-50%); animation: smoothPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .played-north { position: absolute; top: 0; left: 50%; transform: translateX(-50%); animation: smoothPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .played-east { position: absolute; right: 0; top: 50%; transform: translateY(-50%); animation: smoothPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+    @keyframes smoothPop {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* استایل کارت‌ها */
+    .card {
+      width: 48px; height: 70px;
+      background: linear-gradient(145deg, #ffffff, #f0f0f0);
+      border-radius: 8px; border: 1px solid #bdc3c7;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 4px; position: relative; font-weight: 900; line-height: 1;
+      font-family: Arial, sans-serif; flex-shrink: 0; transition: transform 0.2s;
+    }
+    .card.red { color: #e74c3c; }
+    .card.black { color: #2c3e50; }
+
+    .card-corner { display: flex; flex-direction: column; align-items: center; width: max-content; }
+    .card-corner.top-left { align-self: flex-start; }
+    .card-corner.bottom-right { align-self: flex-end; transform: rotate(180deg); }
+    .card-rank { font-size: 13px; font-weight: 950; }
+    .card-suit-small { font-size: 10px; margin-top: -2px; }
+
+    .card-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; pointer-events: none; }
+    .card-center .suit-main { font-size: 22px; }
+    .card-center .face-img { font-size: 22px; line-height: 1; }
+
+    /* چیدمان تعداد خال‌های اعداد در وسط کارت */
+    .card-pips-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 1px 3px;
+      width: 32px;
+      height: 44px;
+      font-size: 10px;
+      line-height: 1;
+    }
+
+    /* دست بازیکن پایین (سوت) */
+    #player-hand {
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+      min-height: 90px;
+      background: rgba(0,0,0,0.4);
+      overflow-x: auto;
+    }
+    #player-hand .card {
+      margin: 0 -12px;
+      cursor: pointer;
+    }
+    #player-hand .card:hover {
+      transform: translateY(-10px);
+    }
+
+    /* پنل‌ها و پیام‌ها */
+    .modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    .btn:hover { background: #219653; }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <!-- نوار امتیاز و حکم -->
+    <div id="topbar">
+      <div class="score-pill">ما: <span id="score-us">0</span></div>
+      <div class="score-pill">حکم: <b id="hokm-suit-display" style="font-size: 16px; vertical-align: middle;">—</b></div>
+      <div class="score-pill">حریف: <span id="score-them">0</span></div>
+    </div>
+
+    <!-- میز بازی -->
+    <div id="table-area">
+      <div id="trick-area"></div>
+    </div>
+
+    <!-- دست بازیکن -->
+    <div id="player-hand"></div>
+  </div>
+
+  <script>
+    const SUIT_SYMBOL = { 'H': '♥', 'D': '♦', 'C': '♣', 'S': '♠' };
+    const SUIT_COLOR = { 'H': 'red', 'D': 'red', 'C': 'black', 'S': 'black' };
+    const RANK_LABEL = { 11: 'J', 12: 'Q', 13: 'K', 14: 'A' };
+    const FACE_ICONS = { 11: '👮‍♂️', 12: '👸', 13: '🤴' };
+
+    let state = {
+      hands: [[], [], [], []],
+      trick: [],
+      hokmSuit: null,
+      turn: 0
+    };
+
+    function $(id) { return document.getElementById(id); }
+
+    function createCardHTML(card, extraClass = ''){
+      const rank = RANK_LABEL[card.r] || card.r;
+      const symbol = SUIT_SYMBOL[card.s];
+      const colorClass = SUIT_COLOR[card.s];
+      const faceIcon = FACE_ICONS[card.r] || '';
+
+      let centerContent = '';
+      if (faceIcon) {
+        centerContent = `<span class="face-img">${faceIcon}</span>`;
+      } else if (card.r >= 2 && card.r <= 10) {
+        let pips = '';
+        for (let i = 0; i < card.r; i++) {
+          pips += `<span class="pip">${symbol}</span>`;
+        }
+        centerContent = `<div class="card-pips-grid">${pips}</div>`;
+      } else {
+        centerContent = `<span class="suit-main">${symbol}</span>`;
+      }
+
+      return `
+        <div class="card ${colorClass} ${extraClass}">
+          <div class="card-corner top-left">
+            <span class="card-rank">${rank}</span>
+            <span class="card-suit-small">${symbol}</span>
+          </div>
+          <div class="card-center">
+            ${centerContent}
+          </div>
+          <div class="card-corner bottom-right">
+            <span class="card-rank">${rank}</span>
+            <span class="card-suit-small">${symbol}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function render() {
+      // رندر دست بازیکن پایین
+      const handEl = $('player-hand');
+      handEl.innerHTML = state.hands[0].map(c => createCardHTML(c)).join('');
+
+      // نمایش حکم
+      const hokmEl = $('hokm-suit-display');
+      if(state.hokmSuit) {
+        hokmEl.textContent = SUIT_SYMBOL[state.hokmSuit];
+        hokmEl.style.color = (SUIT_COLOR[state.hokmSuit] === 'red') ? '#e74c3c' : '#f1c40f';
+      } else {
+        hokmEl.textContent = '—';
+        hokmEl.style.color = '#fff';
+      }
+    }
+
+    // نمونه اولیه تست برای دیدن کارت‌ها و حکم
+    function initGame() {
+      state.hokmSuit = 'H';
+      state.hands[0] = [
+        {s: 'H', r: 10},
+        {s: 'S', r: 14},
+        {s: 'D', r: 7},
+        {s: 'C', r: 13}
+      ];
+      render();
+    }
+
+    window.onload = initGame;
+  </script>
+</body>
+</html>
