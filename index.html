@@ -1,0 +1,744 @@
+<!-- Version: 2026-Final-Polished -->
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>سلطان حکم - آنلاین، ربات و P2P وای‌فای</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap');
+  
+  :root {
+    --gold: #f39c12;
+    --gold-bright: #ffd700;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  
+  html, body { 
+    width: 100vw; height: 100dvh; 
+    font-family: 'Vazirmatn', sans-serif; 
+    background: #000; color: #fff; overflow: hidden; 
+  }
+
+  #app { width: 100vw; height: 100dvh; position: relative; overflow: hidden; background: radial-gradient(circle, #1a0505 0%, #050505 100%); }
+
+  .screen { position: absolute; inset: 0; width: 100%; height: 100%; display: none; flex-direction: column; z-index: 1; overflow-y: auto; }
+  .screen.active { display: flex; z-index: 10; }
+
+  #screen-home { align-items: center; justify-content: center; gap: 15px; background: radial-gradient(circle, #4a0000, #110000); }
+  .logo { font-size: 30px; font-weight: 900; color: var(--gold-bright); text-shadow: 0 0 20px rgba(255,215,0,0.5); text-align: center; }
+  .card-panel { background: rgba(0,0,0,0.6); border: 2px solid var(--gold); border-radius: 20px; padding: 20px; width: min(90vw, 360px); display: flex; flex-direction: column; gap: 10px; backdrop-filter: blur(10px); }
+  
+  .btn { width: 100%; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(180deg, #27ae60, #1e824c); color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; border-bottom: 4px solid #145a32; transition: transform 0.1s; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+  .btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+  .btn-sec { background: linear-gradient(180deg, #2980b9, #1f618d); border-bottom-color: #154360; }
+  .btn-warn { background: linear-gradient(180deg, #e67e22, #d35400); border-bottom-color: #a04000; }
+  .btn-p2p { background: linear-gradient(180deg, #8e44ad, #6c3483); border-bottom-color: #512e5f; }
+  .btn-back { background: linear-gradient(180deg, #c0392b, #962d22); border-bottom-color: #641e16; font-size: 12px; padding: 6px 10px; width: auto; }
+
+  /* لابی و اتاق دوستان */
+  #screen-lobby, #screen-p2p { align-items: center; justify-content: center; background: radial-gradient(circle, #300, #100); padding: 20px; }
+  .lobby-box { background: rgba(0,0,0,0.85); border: 2px solid var(--gold); border-radius: 20px; padding: 20px; width: min(94vw, 400px); display: flex; flex-direction: column; gap: 12px; }
+  .room-players-list { display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; }
+  .room-player-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; }
+
+  textarea { width: 100%; height: 70px; background: #111; color: #fff; border: 1px solid var(--gold); border-radius: 8px; padding: 8px; font-size: 11px; resize: none; font-family: monospace; }
+
+  /* صفحه بازی */
+  #screen-game { background: radial-gradient(circle, #610707 0%, #1f0202 100%); overflow: hidden; display: flex; flex-direction: column; }
+
+  #topbar { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; background: rgba(0,0,0,0.85); border-bottom: 2px solid var(--gold); height: 48px; flex-shrink: 0; }
+  .brand { font-weight: 900; font-size: 13px; color: var(--gold-bright); }
+  .scoreboard { display: flex; gap: 6px; font-size: 11px; align-items: center; }
+  .score-pill { background: rgba(0,0,0,0.7); border: 1px solid var(--gold); border-radius: 15px; padding: 3px 8px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .score-pill b { color: var(--gold-bright); }
+  
+  /* استایل رنگی و خاص نماد حکم در بالای صفحه */
+  #hokm-suit-display { font-size: 15px; font-weight: 900; display: inline-flex; align-items: center; vertical-align: middle; }
+  #hokm-suit-display.red { color: #e74c3c; text-shadow: 0 0 8px rgba(231,76,60,0.6); }
+  #hokm-suit-display.black { color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,0.6); }
+
+  #trick-toast {
+    position: absolute; top: 56px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.95);
+    border: 2px solid var(--gold); color: #fff; padding: 6px 14px;
+    border-radius: 20px; font-size: 12px; font-weight: 800; z-index: 250; display: none; text-align: center; white-space: nowrap;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.9);
+  }
+
+  #table-wrap { flex: 1; position: relative; width: 100%; min-height: 0; display: flex; align-items: center; justify-content: center; }
+
+  .seat { position: absolute; display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: 700; text-shadow: 0 2px 6px #000; z-index: 5; }
+  .seat-south { bottom: 8px; left: 50%; transform: translateX(-50%); }
+  .seat-north { top: 8px; left: 50%; transform: translateX(-50%); }
+  .seat-west { left: 10px; top: 38%; transform: translateY(-50%); }
+  .seat-east { right: 10px; top: 38%; transform: translateY(-50%); }
+  
+  .avatar { position: relative; width: 34px; height: 34px; border-radius: 50%; background: #111; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.7); }
+  .turn-active .avatar { box-shadow: 0 0 20px var(--gold-bright); border-color: #fff; transform: scale(1.1); }
+  .winner-badge { position: absolute; top: -8px; right: -8px; background: var(--gold-bright); color: #000; font-size: 10px; font-weight: 900; border-radius: 10px; padding: 1px 5px; display: none; }
+
+  #trick-area { position: absolute; top: 44%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 100px; }
+
+  /* کارت‌ها و انیمیشن روان‌تر بدون پرش */
+  .card {
+    width: 44px; height: 64px;
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border-radius: 6px; border: 1px solid #bdc3c7;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 2px 3px; position: relative; font-weight: 900; line-height: 1;
+    font-family: Arial, sans-serif; flex-shrink: 0; transition: transform 0.15s;
+  }
+
+  .card-corner { display: flex; flex-direction: column; align-items: center; width: max-content; }
+  .card-corner.top-left { align-self: flex-start; }
+  .card-corner.bottom-right { align-self: flex-end; transform: rotate(180deg); }
+  .card-rank { font-size: 11px; font-weight: 900; }
+  .card-suit-small { font-size: 8px; margin-top: -1px; }
+
+  /* چیدمان خال‌ها و تصاویر در وسط کارت (پاسور واقعی) */
+  .card-center { 
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center; 
+    width: 28px; height: 38px; pointer-events: none; gap: 1px; overflow: hidden;
+  }
+  .card-center .pip { font-size: 9px; line-height: 1; }
+  .card-center .face-img { font-size: 20px; line-height: 1; }
+
+  .card.red { color: #e74c3c; }
+  .card.black { color: #2c3e50; }
+
+  .played-south { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); animation: smoothPop 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+  .played-west { position: absolute; left: 0; top: 50%; transform: translateY(-50%); animation: smoothPop 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+  .played-north { position: absolute; top: 0; left: 50%; transform: translateX(-50%); animation: smoothPop 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+  .played-east { position: absolute; right: 0; top: 50%; transform: translateY(-50%); animation: smoothPop 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+
+  @keyframes smoothPop {
+    0% { transform: scale(0.6) translate(-50%, -50%); opacity: 0; }
+    100% { transform: scale(1) translate(-50%, -50%); opacity: 1; }
+  }
+
+  /* پنل پایین و چیدمان کارت‌ها در یک ردیف منظم */
+  #player-bottom-panel {
+    background: rgba(5,5,5,0.96); border-top: 2px solid var(--gold);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 8px 2px 10px 2px; z-index: 200; flex-shrink: 0; width: 100%;
+  }
+
+  #hand-container { 
+    display: flex; 
+    flex-direction: row; 
+    flex-wrap: nowrap; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 3px; 
+    width: 100%; 
+    overflow-x: auto; 
+    padding: 4px 0; 
+  }
+
+  .hand-card-wrapper { transition: transform 0.15s ease; cursor: pointer; touch-action: manipulation; flex-shrink: 0; }
+  .hand-card-wrapper.playable { transform: translateY(-6px); }
+  .hand-card-wrapper.playable .card { border: 2px solid #2ecc71; box-shadow: 0 0 10px rgba(46, 204, 113, 0.9); }
+  .hand-card-wrapper.disabled { opacity: 0.4; filter: grayscale(0.8); }
+
+  /* مودال انتخاب حکم */
+  #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 300; backdrop-filter: blur(6px); }
+  #modal-overlay.open { display: flex; }
+  #modal { background: linear-gradient(145deg, #300202, #100000); border: 2px solid var(--gold); border-radius: 20px; padding: 20px; width: min(94vw, 380px); text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); }
+  #modal h3 { color: var(--gold-bright); margin-bottom: 12px; font-size: 15px; }
+
+  .hokm-cards-preview { display: flex; gap: 5px; justify-content: center; margin-bottom: 14px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 10px; overflow-x: auto; }
+  .suit-choice-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 12px; }
+  .suit-btn { width: 52px; height: 52px; border-radius: 12px; background: #fff; font-size: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+  .suit-btn.red { color: #e74c3c; }
+  .suit-btn.black { color: #2c3e50; }
+
+  .action-btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+  .btn-fold { background: #e74c3c; border-bottom-color: #c0392b; font-size: 12px; padding: 10px; }
+  .btn-continue { background: #27ae60; border-bottom-color: #1e824c; font-size: 12px; padding: 10px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- صفحه اصلی -->
+  <div id="screen-home" class="screen active">
+    <div class="logo">👑 سلطان حکم</div>
+    <div class="card-panel">
+      <button class="btn" id="start-4p-btn">بازی ۴ نفره با ربات 👥</button>
+      <button class="btn btn-sec" id="start-2p-btn">بازی ۲ نفره اختصاصی ⚔️</button>
+      <button class="btn btn-warn" id="open-lobby-btn">درخواست به دوستان (لابی آنلاین) 🌐</button>
+      <button class="btn btn-p2p" id="open-p2p-btn">اتاق وای‌فای محلی (میزبان P2P) 📶</button>
+    </div>
+  </div>
+
+  <!-- لابی اتاق دوستان -->
+  <div id="screen-lobby" class="screen">
+    <div class="lobby-box">
+      <h3 style="color:var(--gold-bright); text-align:center;">اتاق بازی دوستانه</h3>
+      <p style="font-size:12px; color:#ccc; text-align:center;">اگر اتاق پر نشود، صندلی‌های خالی به صورت خودکار با ربات پر می‌شوند.</p>
+      
+      <div class="room-players-list" id="room-players-container"></div>
+
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button class="btn" id="fill-bots-btn" style="flex:2;">شروع و پر کردن با ربات 🤖</button>
+        <button class="btn btn-back" onclick="switchScreen('screen-home')" style="flex:1;">خروج</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- صفحه اتصال وای‌فای P2P -->
+  <div id="screen-p2p" class="screen">
+    <div class="lobby-box">
+      <h3 style="color:var(--gold-bright); text-align:center;">اتاق وای‌فای P2P (بدون اینترنت)</h3>
+      <p style="font-size:11px; color:#ccc; text-align:center;">شما (سرور): کد خود را کپی کنید و به دوستتان بدهید، یا کد او را وارد کنید تا مستقیماً وصل شوید.</p>
+      
+      <div>
+        <label style="font-size:11px; color:var(--gold);">کد اتصال شما (Offer):</label>
+        <textarea id="p2p-my-code" readonly placeholder="در حال تولید کد سرور..."></textarea>
+      </div>
+      <div>
+        <label style="font-size:11px; color:var(--gold);">کد طرف مقابل را اینجا وارد کنید:</label>
+        <textarea id="p2p-peer-code" placeholder="کد دوستتان را اینجا پیست کنید..."></textarea>
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sec" id="p2p-connect-btn" style="flex:1;">اتصال به همتا 🤝</button>
+        <button class="btn btn-back" onclick="switchScreen('screen-home')" style="flex:1;">خروج</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- صفحه بازی -->
+  <div id="screen-game" class="screen">
+    <div id="topbar">
+      <div class="brand" id="game-mode-title">حکم ۴ نفره</div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="scoreboard">
+          <div class="score-pill">ما: <b id="total-us">0</b> | آن‌ها: <b id="total-them">0</b></div>
+          <div class="score-pill">حکم: <span id="hokm-suit-display">—</span></div>
+        </div>
+        <button class="btn btn-back" onclick="switchScreen('screen-home')">منو 🏠</button>
+      </div>
+    </div>
+
+    <div id="trick-toast"></div>
+
+    <div id="table-wrap">
+      <div id="trick-area"></div>
+
+      <div class="seat seat-north" id="seat-2">
+        <div class="avatar"><span class="bot-icon">🤖</span><span class="winner-badge" id="badge-2">🏆</span></div>
+        <div id="name-2">نیلوفر (ربات)</div>
+      </div>
+      <div class="seat seat-west" id="seat-1">
+        <div class="avatar"><span class="bot-icon">🤖</span><span class="winner-badge" id="badge-1">🏆</span></div>
+        <div id="name-1">رضا (ربات)</div>
+      </div>
+      <div class="seat seat-east" id="seat-3">
+        <div class="avatar"><span class="bot-icon">🤖</span><span class="winner-badge" id="badge-3">🏆</span></div>
+        <div id="name-3">امیر (ربات)</div>
+      </div>
+      <div class="seat seat-south" id="seat-0">
+        <div class="avatar">👤<span class="winner-badge" id="badge-0">🏆</span></div>
+        <div id="name-0">شما</div>
+      </div>
+    </div>
+
+    <div id="player-bottom-panel">
+      <div id="hand-container"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="modal-overlay"><div id="modal"></div></div>
+
+<script>
+(function(){
+  const SUITS=['s','h','d','c'];
+  const SUIT_SYMBOL={s:'♠', h:'♥', d:'♦', c:'♣'};
+  const SUIT_COLOR={s:'black', h:'red', d:'red', c:'black'};
+  const RANKS=[2,3,4,5,6,7,8,9,10,11,12,13,14];
+  const RANK_LABEL={11:'J', 12:'Q', 13:'K', 14:'A'};
+  const FACE_ICONS={11:'⚔️', 12:'👸', 13:'👑', 14:''};
+  const POS_CLASS={0:'played-south', 1:'played-west', 2:'played-north', 3:'played-east'};
+
+  let gameMode = 4; 
+  let gameScore = { us: 0, them: 0 };
+
+  let state = {
+    hands: {0:[], 1:[], 2:[], 3:[]},
+    deck: [],
+    hakem: 0,
+    hokmSuit: null,
+    turn: 0,
+    trick: [],
+    tricksWon: {us:0, them:0},
+    status: 'choosingHokm',
+    isBot: {0: false, 1: true, 2: true, 3: true},
+    playerNames: {0: 'شما', 1: 'رضا', 2: 'نیلوفر', 3: 'امیر'}
+  };
+
+  let roomPlayers = [
+    { name: 'شما (سازنده اتاق)', isBot: false, seat: 0 },
+    { name: 'دوست دعوت‌شده (منتظر...)', isBot: true, seat: 1 },
+    { name: 'خالی (تبدیل به ربات می‌شود)', isBot: true, seat: 2 },
+    { name: 'خالی (تبدیل به ربات می‌شود)', isBot: true, seat: 3 }
+  ];
+
+  let pc = null;
+  let dataChannel = null;
+  let isP2PServer = false;
+
+  function $(id){ return document.getElementById(id); }
+
+  window.switchScreen = function(screenId){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    $(screenId).classList.add('active');
+  }
+
+  $('start-4p-btn').addEventListener('click', ()=>{
+    gameMode = 4;
+    state.isBot = {0: false, 1: true, 2: true, 3: true};
+    setupGameUI();
+  });
+
+  $('start-2p-btn').addEventListener('click', ()=>{
+    gameMode = 2;
+    state.isBot = {0: false, 1: false, 2: true, 3: false};
+    setupGameUI();
+  });
+
+  $('open-lobby-btn').addEventListener('click', ()=>{
+    renderLobby();
+    switchScreen('screen-lobby');
+  });
+
+  $('open-p2p-btn').addEventListener('click', ()=>{
+    initP2P();
+    switchScreen('screen-p2p');
+  });
+
+  function renderLobby(){
+    const container = $('room-players-container');
+    container.innerHTML = roomPlayers.map((p, idx) => `
+      <div class="room-player-item">
+        <span>صندلی ${idx + 1}: ${p.name}</span>
+        <span style="color:${p.isBot ? '#e74c3c' : '#2ecc71'}">${p.isBot ? '🤖 ربات' : '👤 انسان'}</span>
+      </div>
+    `).join('');
+  }
+
+  $('fill-bots-btn').addEventListener('click', ()=>{
+    gameMode = 4;
+    state.isBot = {0: false, 1: true, 2: true, 3: true};
+    showToast('صندلی‌های خالی با ربات پر شدند! 🤖');
+    setTimeout(setupGameUI, 800);
+  });
+
+  function initP2P(){
+    isP2PServer = true;
+    pc = new RTCPeerConnection({ iceServers: [] });
+    dataChannel = pc.createDataChannel("hokm-game");
+    setupDataChannel();
+
+    pc.onicecandidate = e => {
+      if(!e.candidate) {
+        $('p2p-my-code').value = JSON.stringify(pc.localDescription);
+      }
+    };
+
+    pc.createOffer().then(offer => pc.setLocalDescription(offer));
+  }
+
+  $('p2p-connect-btn').addEventListener('click', async ()=>{
+    const peerCodeVal = $('p2p-peer-code').value.trim();
+    if(!peerCodeVal) {
+      showToast('⚠️ لطفاً کد را وارد کنید!', true);
+      return;
+    }
+
+    if(isP2PServer && dataChannel.readyState === 'open'){
+      showToast('قبلاً متصل شده‌اید!');
+      return;
+    }
+
+    try {
+      const desc = JSON.parse(peerCodeVal);
+      if(!pc){
+        isP2PServer = false;
+        pc = new RTCPeerConnection({ iceServers: [] });
+        pc.ondatachannel = e => {
+          dataChannel = e.channel;
+          setupDataChannel();
+        };
+        pc.onicecandidate = e => {
+          if(!e.candidate) {
+            $('p2p-my-code').value = JSON.stringify(pc.localDescription);
+          }
+        };
+      }
+
+      await pc.setRemoteDescription(desc);
+      if(desc.type === 'offer'){
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+      }
+      showToast('اتصال P2P برقرار شد! 📶');
+      setTimeout(setupGameUI, 1000);
+    } catch(err){
+      showToast('❌ کد نامعتبر است!', true);
+    }
+  });
+
+  function setupDataChannel(){
+    dataChannel.onopen = () => { showToast('دوست شما به سرور P2P متصل شد! 🎉'); };
+    dataChannel.onmessage = e => {
+      const msg = JSON.parse(e.data);
+      if(msg.type === 'playCard'){
+        playCard(msg.seat, msg.card);
+      }
+    };
+  }
+
+  function setupGameUI(){
+    $('game-mode-title').textContent = gameMode === 2 ? 'حکم ۲ نفره اختصاصی' : 'حکم ۴ نفره';
+    if(gameMode === 2){
+      $('seat-1').style.display = 'none';
+      $('seat-2').style.display = 'flex';
+      $('seat-3').style.display = 'none';
+      state.isBot = {0: false, 1: false, 2: true, 3: false};
+    } else {
+      $('seat-1').style.display = 'flex';
+      $('seat-2').style.display = 'flex';
+      $('seat-3').style.display = 'flex';
+      state.isBot = {0: false, 1: true, 2: true, 3: true};
+    }
+
+    switchScreen('screen-game');
+    gameScore = { us: 0, them: 0 };
+    state.hakem = 0;
+    startNewHand();
+  }
+
+  function startNewHand(){
+    let deck = [];
+    for(let s of SUITS) for(let r of RANKS) deck.push({s,r});
+    deck.sort(()=>Math.random()-0.5);
+
+    state.deck = deck;
+    state.hokmSuit = null;
+    state.trick = [];
+    state.status = 'choosingHokm';
+    state.tricksWon = {us:0, them:0};
+
+    let activeSeats = gameMode === 2 ? [0, 2] : [0, 1, 2, 3];
+    activeSeats.forEach(s => {
+      state.hands[s] = state.deck.splice(0, 5);
+    });
+
+    render();
+    if(state.hakem === 0){
+      showHokmModal();
+    } else {
+      setTimeout(botChooseHokm, 1000);
+    }
+  }
+
+  function botChooseHokm(){
+    const botHand = state.hands[state.hakem];
+    const suitCounts = {s:0, h:0, d:0, c:0};
+    botHand.forEach(c => suitCounts[c.s]++);
+    let bestSuit = 's';
+    let max = -1;
+    for(let s in suitCounts){
+      if(suitCounts[s] > max){ max = suitCounts[s]; bestSuit = s; }
+    }
+    state.hokmSuit = bestSuit;
+    showToast(`حاکم (${state.playerNames[state.hakem]}) خال ${SUIT_SYMBOL[bestSuit]} را حکم کرد.`);
+    finishDealingAndStart();
+  }
+
+  function showHokmModal(){
+    const overlay = $('modal-overlay');
+    const modal = $('modal');
+    const myCards = state.hands[0];
+    const cardsHTML = myCards.map(c => createCardHTML(c)).join('');
+
+    modal.innerHTML = `
+      <h3>👑 ۵ برگ شما برای تعیین حکم:</h3>
+      <div class="hokm-cards-preview">${cardsHTML}</div>
+      <h3>حکم را انتخاب کنید:</h3>
+      <div class="suit-choice-row">
+        ${SUITS.map(s=>`<button class="suit-btn ${SUIT_COLOR[s]}" onclick="selectHokm('${s}')">${SUIT_SYMBOL[s]}</button>`).join('')}
+      </div>
+      <div id="continue-section" style="display:none;">
+        <p style="margin: 10px 0; font-size:13px; color:#f1c40f;">با این دست ادامه می‌دهید؟</p>
+        <div class="action-btn-row">
+          <button class="btn btn-continue" onclick="confirmContinue()">ادامه بازی ▶</button>
+          <button class="btn btn-fold" onclick="foldHand()">انصراف 🏳️</button>
+        </div>
+      </div>`;
+    overlay.classList.add('open');
+  }
+
+  window.selectHokm = function(suit){
+    state.hokmSuit = suit;
+    updateHokmDisplay();
+    $('continue-section').style.display = 'block';
+  };
+
+  window.confirmContinue = function(){
+    $('modal-overlay').classList.remove('open');
+    finishDealingAndStart();
+  };
+
+  window.foldHand = function(){
+    $('modal-overlay').classList.remove('open');
+    showToast('شما انصراف دادید. (+۱ امتیاز به حریف)');
+    gameScore.them += 1;
+    state.hakem = gameMode === 2 ? (state.hakem === 0 ? 2 : 0) : (state.hakem + 1) % 4;
+    setTimeout(startNewHand, 1800);
+  };
+
+  function finishDealingAndStart(){
+    let activeSeats = gameMode === 2 ? [0, 2] : [0, 1, 2, 3];
+    activeSeats.forEach(s => {
+      let needed = 13 - state.hands[s].length;
+      if(needed > 0){
+        state.hands[s] = state.hands[s].concat(state.deck.splice(0, needed));
+      }
+      state.hands[s].sort((a,b)=>a.s.localeCompare(b.s) || a.r - b.r);
+    });
+
+    state.status = 'playing';
+    state.turn = state.hakem;
+    render();
+    checkTurn();
+  }
+
+  function checkTurn(){
+    if(state.status !== 'playing') return;
+    let activeSeats = gameMode === 2 ? [0, 2] : [0, 1, 2, 3];
+    
+    activeSeats.forEach(s => {
+      const seatEl = $('seat-'+s);
+      if(s === state.turn) seatEl.classList.add('turn-active');
+      else seatEl.classList.remove('turn-active');
+    });
+
+    if(state.isBot[state.turn]){
+      setTimeout(botPlayCard, 700);
+    }
+  }
+
+  function legalMoves(seat){
+    const hand = state.hands[seat];
+    if(state.trick.length === 0) return hand;
+    const leadSuit = state.trick[0].card.s;
+    const inSuit = hand.filter(c => c.s === leadSuit);
+    return inSuit.length > 0 ? inSuit : hand;
+  }
+
+  function botPlayCard(){
+    let maxTrickLen = gameMode === 2 ? 2 : 4;
+    if(state.trick.length >= maxTrickLen) return;
+    const seat = state.turn;
+    const valid = legalMoves(seat);
+    if(!valid || valid.length === 0) return;
+
+    valid.sort((a,b) => b.r - a.r);
+    playCard(seat, valid[0]);
+  }
+
+  function playCard(seat, card){
+    const idx = state.hands[seat].findIndex(c => c.s===card.s && c.r===card.r);
+    if(idx !== -1) state.hands[seat].splice(idx, 1);
+
+    state.trick.push({seat, card});
+    render();
+
+    if(dataChannel && dataChannel.readyState === 'open' && seat === 0){
+      dataChannel.send(JSON.stringify({ type: 'playCard', seat, card }));
+    }
+
+    let maxTrickLen = gameMode === 2 ? 2 : 4;
+    if(state.trick.length < maxTrickLen){
+      state.turn = gameMode === 2 ? (state.turn === 0 ? 2 : 0) : (state.turn + 1) % 4;
+      checkTurn();
+    } else {
+      setTimeout(resolveTrick, 1000);
+    }
+  }
+
+  function showToast(text, isError = false){
+    const toast = $('trick-toast');
+    toast.textContent = text;
+    toast.style.background = isError ? '#e74c3c' : 'rgba(0,0,0,0.95)';
+    toast.style.display = 'block';
+    setTimeout(()=>{ toast.style.display = 'none'; }, 2200);
+  }
+
+  function resolveTrick(){
+    const hokm = state.hokmSuit;
+    let best = state.trick[0];
+
+    for(let i=1; i<state.trick.length; i++){
+      const curr = state.trick[i];
+      const b = best.card;
+      const c = curr.card;
+
+      if(c.s === hokm && b.s !== hokm){
+        best = curr;
+      } else if(c.s === b.s && c.r > b.r){
+        best = curr;
+      }
+    }
+
+    const winner = best.seat;
+    if(winner === 0 || winner === 2) {
+      state.tricksWon.us++;
+    } else {
+      state.tricksWon.them++;
+    }
+
+    let activeSeats = gameMode === 2 ? [0, 2] : [0, 1, 2, 3];
+    activeSeats.forEach(s => {
+      $('badge-'+s).style.display = (s === winner) ? 'block' : 'none';
+    });
+
+    setTimeout(()=>{
+      activeSeats.forEach(s => $('badge-'+s).style.display = 'none');
+    }, 1500);
+
+    state.trick = [];
+    render();
+
+    let winTarget = 7;
+    if(state.tricksWon.us === winTarget || state.tricksWon.them === winTarget || state.hands[0].length === 0){
+      if(state.tricksWon.us >= winTarget){
+        showToast('🏆 تیم شما این دست را برد!');
+        gameScore.us += 1;
+      } else {
+        showToast('😞 تیم حریف این دست را برد!');
+        gameScore.them += 1;
+      }
+
+      state.hakem = gameMode === 2 ? (state.hakem === 0 ? 2 : 0) : (state.hakem + 1) % 4;
+
+      if(gameScore.us >= 7 || gameScore.them >= 7){
+        setTimeout(()=>{
+          alert(gameScore.us >= 7 ? '🎉 تبریک! تیم شما برنده کل بازی شد!' : '❌ بازی تمام شد. حریفان برنده شدند.');
+          gameScore = { us: 0, them: 0 };
+          state.hakem = 0;
+          startNewHand();
+        }, 1200);
+      } else {
+        setTimeout(startNewHand, 1500);
+      }
+    } else {
+      state.turn = winner;
+      render();
+      checkTurn();
+    }
+  }
+
+  window.handleCardClick = function(c){
+    if(state.turn !== 0) {
+      showToast('⚠️ هنوز نوبت شما نشده است!', true);
+      return;
+    }
+    let maxTrickLen = gameMode === 2 ? 2 : 4;
+    if(state.trick.length >= maxTrickLen) return;
+
+    const valid = legalMoves(0);
+    const isAllowed = valid.some(m => m.s === c.s && m.r === c.r);
+
+    if(!isAllowed) {
+      const leadSuitSymbol = SUIT_SYMBOL[state.trick[0].card.s];
+      showToast(`⚠️ باید خال زمینه (${leadSuitSymbol}) را رد کنید!`, true);
+      return;
+    }
+
+    playCard(0, c);
+  };
+
+  function updateHokmDisplay(){
+    const el = $('hokm-suit-display');
+    if(!state.hokmSuit){
+      el.textContent = '—';
+      el.className = '';
+      return;
+    }
+    el.textContent = SUIT_SYMBOL[state.hokmSuit];
+    el.className = SUIT_COLOR[state.hokmSuit];
+  }
+
+  function createCardHTML(card, extraClass = ''){
+    const rank = RANK_LABEL[card.r] || card.r;
+    const symbol = SUIT_SYMBOL[card.s];
+    const colorClass = SUIT_COLOR[card.s];
+    const faceIcon = FACE_ICONS[card.r] || '';
+
+    let centerHTML = '';
+    if(faceIcon){
+      centerHTML = `<span class="face-img">${faceIcon}</span>`;
+    } else {
+      // تولید تعداد خال‌ها به تعداد عدد کارت برای حالت پاسور واقعی
+      let count = card.r;
+      let pips = '';
+      for(let i=0; i<count; i++){
+        pips += `<span class="pip">${symbol}</span>`;
+      }
+      centerHTML = pips;
+    }
+
+    return `
+      <div class="card ${colorClass} ${extraClass}">
+        <div class="card-corner top-left">
+          <span class="card-rank">${rank}</span>
+          <span class="card-suit-small">${symbol}</span>
+        </div>
+        <div class="card-center">
+          ${centerHTML}
+        </div>
+        <div class="card-corner bottom-right">
+          <span class="card-rank">${rank}</span>
+          <span class="card-suit-small">${symbol}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function render(){
+    $('total-us').textContent = gameScore.us;
+    $('total-them').textContent = gameScore.them;
+    updateHokmDisplay();
+
+    const handContainer = $('hand-container');
+    handContainer.innerHTML = '';
+    const myHand = state.hands[0] || [];
+    const validMoves = state.turn === 0 ? legalMoves(0) : [];
+
+    myHand.forEach((c) => {
+      const isPlayable = state.turn === 0 && validMoves.some(m => m.s===c.s && m.r===c.r);
+      const cardWrapper = document.createElement('div');
+      cardWrapper.className = `hand-card-wrapper ${isPlayable ? 'playable' : 'disabled'}`;
+      cardWrapper.innerHTML = createCardHTML(c);
+      cardWrapper.onclick = () => handleCardClick(c);
+      handContainer.appendChild(cardWrapper);
+    });
+
+    const trickEl = $('trick-area');
+    trickEl.innerHTML = '';
+    state.trick.forEach(t => {
+      trickEl.innerHTML += createCardHTML(t.card, POS_CLASS[t.seat]);
+    });
+  }
+})();
+</script>
+</body>
+</html>
