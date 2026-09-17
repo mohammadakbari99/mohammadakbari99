@@ -1,0 +1,829 @@
+<!-- Version: 2026-Super-HD-Hokm -->
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>سلطان حکم - مدرن و آنلاین</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap');
+  
+  :root {
+    --gold: #f39c12;
+    --gold-bright: #ffd700;
+    --bg-deep: radial-gradient(circle, #0d2319 0%, #040c08 100%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  
+  html, body { 
+    width: 100vw; height: 100dvh; 
+    font-family: 'Vazirmatn', sans-serif; 
+    background: #000; color: #fff; overflow: hidden; 
+  }
+
+  #app { width: 100vw; height: 100dvh; position: relative; overflow: hidden; background: var(--bg-deep); }
+
+  .screen { position: absolute; inset: 0; width: 100%; height: 100%; display: none; flex-direction: column; z-index: 1; overflow-y: auto; }
+  .screen.active { display: flex; z-index: 10; }
+
+  #screen-home { align-items: center; justify-content: center; gap: 18px; background: radial-gradient(circle, #2a0808, #0a0101); }
+  .logo { font-size: 34px; font-weight: 900; color: var(--gold-bright); text-shadow: 0 0 25px rgba(255,215,0,0.6); text-align: center; }
+  .card-panel { background: rgba(0,0,0,0.75); border: 2px solid var(--gold); border-radius: 24px; padding: 22px; width: min(90vw, 360px); display: flex; flex-direction: column; gap: 12px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+  
+  .btn { width: 100%; padding: 13px; border: none; border-radius: 14px; background: linear-gradient(180deg, #27ae60, #1e824c); color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; border-bottom: 4px solid #145a32; transition: transform 0.1s; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+  .btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+  .btn-sec { background: linear-gradient(180deg, #2980b9, #1f618d); border-bottom-color: #154360; }
+  .btn-p2p { background: linear-gradient(180deg, #8e44ad, #6c3483); border-bottom-color: #512e5f; }
+  .btn-online { background: linear-gradient(180deg, #d35400, #ba4a00); border-bottom-color: #873600; }
+  .btn-back { background: linear-gradient(180deg, #c0392b, #962d22); border-bottom-color: #641e16; font-size: 12px; padding: 6px 12px; width: auto; }
+
+  .screen-sub { align-items: center; justify-content: center; background: radial-gradient(circle, #1a0826, #07010a); padding: 15px; }
+  .lobby-box { background: rgba(10,5,15,0.95); border: 2px solid var(--gold); border-radius: 20px; padding: 18px; width: min(94vw, 400px); display: flex; flex-direction: column; gap: 12px; max-height: 92vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.9); }
+  
+  textarea, input[type="text"] { width: 100%; background: #111; color: var(--gold-bright); border: 1.5px solid var(--gold); border-radius: 10px; padding: 8px; font-size: 11px; resize: none; font-family: monospace; text-align: center; }
+  .p2p-section-title { font-size: 12px; font-weight: 800; color: var(--gold-bright); margin-top: 4px; border-bottom: 1px dashed rgba(243,156,18,0.3); padding-bottom: 3px; }
+
+  #screen-game { background: var(--bg-deep); overflow: hidden; display: flex; flex-direction: column; }
+
+  #topbar { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--gold); height: 50px; flex-shrink: 0; z-index: 50; }
+  .brand { font-weight: 900; font-size: 12px; color: var(--gold-bright); }
+  .scoreboard { display: flex; gap: 4px; font-size: 10px; align-items: center; }
+  .score-pill { background: rgba(0,0,0,0.8); border: 1px solid var(--gold); border-radius: 12px; padding: 3px 7px; font-weight: 600; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+  .score-pill b { color: var(--gold-bright); }
+  
+  #hokm-suit-display { font-size: 15px; font-weight: 900; display: inline-flex; align-items: center; vertical-align: middle; }
+  #hokm-suit-display.red { color: #ff4d4d; text-shadow: 0 0 8px rgba(255,77,77,0.9); }
+  #hokm-suit-display.black { color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,0.8); }
+
+  #trick-toast {
+    position: absolute; top: 56px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.96);
+    border: 2px solid var(--gold); color: #fff; padding: 6px 16px;
+    border-radius: 20px; font-size: 12px; font-weight: 800; z-index: 250; display: none; text-align: center; white-space: nowrap;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.9);
+  }
+
+  #trick-winner-banner {
+    position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.96); border: 2px solid var(--gold-bright); color: var(--gold-bright);
+    padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 900;
+    z-index: 260; display: none; text-align: center; box-shadow: 0 0 25px rgba(255,215,0,0.7);
+  }
+
+  #table-wrap { flex: 1; position: relative; width: 100%; min-height: 0; display: flex; align-items: center; justify-content: center; }
+
+  .seat { position: absolute; display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: 700; text-shadow: 0 2px 8px #000; z-index: 5; }
+  .seat-south { bottom: 135px; left: 50%; transform: translateX(-50%); }
+  .seat-north { top: 10px; left: 50%; transform: translateX(-50%); }
+  .seat-west { left: 12px; top: 38%; transform: translateY(-50%); }
+  .seat-east { right: 12px; top: 38%; transform: translateY(-50%); }
+  
+  .avatar { position: relative; width: 38px; height: 38px; border-radius: 50%; background: #111; border: 2.5px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.8); }
+  
+  .turn-active .avatar { box-shadow: 0 0 16px var(--gold-bright); border-color: #fff; transform: scale(1.12); }
+  .turn-indicator-text { font-size: 9px; color: var(--gold-bright); background: rgba(0,0,0,0.85); padding: 2px 6px; border-radius: 6px; margin-top: 2px; border: 1px solid var(--gold); display: none; }
+  .turn-active .turn-indicator-text { display: inline-block; }
+
+  .hakem-badge { position: absolute; top: -8px; left: -8px; background: var(--gold-bright); color: #000; font-size: 10px; font-weight: 900; border-radius: 50%; width: 18px; height: 18px; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.6); z-index: 6; }
+  .winner-badge { position: absolute; top: -8px; right: -8px; background: #2ecc71; color: #fff; font-size: 9px; font-weight: 900; border-radius: 8px; padding: 1px 5px; display: none; z-index: 6; }
+
+  #trick-area { position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%); width: 130px; height: 90px; }
+
+  .card {
+    width: 44px; height: 64px;
+    background: linear-gradient(145deg, #ffffff 0%, #f2f2f2 100%);
+    border-radius: 6px; border: 1.5px solid #bdc3c7;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 3px; position: relative; font-weight: 900; line-height: 1;
+    font-family: 'Times New Roman', serif; flex-shrink: 0;
+  }
+
+  .card-corner { display: flex; flex-direction: column; align-items: center; width: max-content; }
+  .card-corner.top-left { align-self: flex-start; }
+  .card-corner.bottom-right { align-self: flex-end; transform: rotate(180deg); }
+  .card-rank { font-size: 11px; font-weight: 900; letter-spacing: -0.5px; }
+  .card-suit-small { font-size: 8px; margin-top: -1px; }
+
+  .card-center { 
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+    display: flex; align-items: center; justify-content: center; 
+    width: 26px; height: 38px; pointer-events: none; overflow: hidden;
+  }
+  .card-center .pip-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr);
+    gap: 0.5px; align-items: center; justify-items: center; width: 100%; height: 100%;
+  }
+  .card-center .pip { font-size: 8px; line-height: 1; }
+  .card-center .face-img { font-size: 20px; line-height: 1; }
+
+  .card.red { color: #eb4d4b; }
+  .card.black { color: #2f3640; }
+
+  .played-south { position: absolute; bottom: 0px; left: 50%; transform: translateX(-50%); animation: slideUpSmooth 0.2s forwards; }
+  .played-west { position: absolute; left: 0px; top: 50%; transform: translateY(-50%); animation: slideRightSmooth 0.2s forwards; }
+  .played-north { position: absolute; top: 0px; left: 50%; transform: translateX(-50%); animation: slideDownSmooth 0.2s forwards; }
+  .played-east { position: absolute; right: 0px; top: 50%; transform: translateY(-50%); animation: slideLeftSmooth 0.2s forwards; }
+
+  @keyframes slideUpSmooth { 0% { transform: translate(-50%, 25px); opacity: 0; } 100% { transform: translate(-50%, 0); opacity: 1; } }
+  @keyframes slideRightSmooth { 0% { transform: translate(-25px, -50%); opacity: 0; } 100% { transform: translate(0, -50%); opacity: 1; } }
+  @keyframes slideDownSmooth { 0% { transform: translate(-50%, -25px); opacity: 0; } 100% { transform: translate(-50%, 0); opacity: 1; } }
+  @keyframes slideLeftSmooth { 0% { transform: translate(25px, -50%); opacity: 0; } 100% { transform: translate(0, -50%); opacity: 1; } }
+
+  /* پنل پایین کاملاً به بالا کشیده شده و استاندارد شد */
+  #player-bottom-panel {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    width: 96%; max-width: 600px;
+    background: rgba(8, 24, 17, 0.95); border: 2px solid var(--gold);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 8px 6px; z-index: 200; border-radius: 16px;
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+  }
+
+  #hand-container { 
+    display: flex; flex-direction: row; flex-wrap: nowrap; 
+    justify-content: center; align-items: center; gap: 3px; width: 100%; overflow-x: auto; padding: 4px 0; 
+  }
+
+  .hand-card-wrapper { transition: transform 0.15s ease; cursor: pointer; touch-action: manipulation; flex-shrink: 0; }
+  .hand-card-wrapper.playable { transform: translateY(-10px); }
+  .hand-card-wrapper.playable .card { border: 2px solid #2ecc71; box-shadow: 0 0 12px rgba(46, 204, 113, 0.9); }
+  .hand-card-wrapper.disabled { opacity: 0.5; filter: grayscale(0.4); }
+
+  #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: none; align-items: center; justify-content: center; z-index: 300; backdrop-filter: blur(8px); }
+  #modal-overlay.open { display: flex; }
+  #modal { background: linear-gradient(145deg, #123627, #071710); border: 2.5px solid var(--gold); border-radius: 22px; padding: 22px; width: min(94vw, 390px); text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.95); }
+  #modal h3 { color: var(--gold-bright); margin-bottom: 12px; font-size: 16px; }
+
+  .hokm-cards-preview { display: flex; gap: 5px; justify-content: center; margin-bottom: 14px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 12px; overflow-x: auto; }
+  .suit-choice-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 12px; }
+  .suit-btn { width: 56px; height: 56px; border-radius: 14px; background: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+  .suit-btn.red { color: #eb4d4b; }
+  .suit-btn.black { color: #2f3640; }
+
+  .action-btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+  .btn-fold { background: #eb4d4b; border-bottom-color: #c0392b; font-size: 13px; padding: 10px; }
+  .btn-continue { background: #27ae60; border-bottom-color: #1e824c; font-size: 13px; padding: 10px; }
+</style>
+<!-- کتابخانه PeerJS برای لابی آنلاین اینترنتی -->
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+<div id="app">
+
+  <!-- صفحه اصلی -->
+  <div id="screen-home" class="screen active">
+    <div class="logo">👑 سلطان حکم</div>
+    <div class="card-panel">
+      <button class="btn" id="start-4p-btn">بازی ۴ نفره با ربات 👥</button>
+      <button class="btn btn-sec" id="start-2p-btn">بازی ۲ نفره محلی ⚔️</button>
+      <button class="btn btn-online" id="open-online-btn">لابی آنلاین اینترنتی (با کد کوتاه) 🌐</button>
+      <button class="btn btn-p2p" id="open-p2p-btn">اتصال دستی P2P (کد Offer/Answer) 📶</button>
+    </div>
+  </div>
+
+  <!-- صفحه لابی آنلاین اینترنتی با PeerJS -->
+  <div id="screen-online" class="screen screen-sub">
+    <div class="lobby-box">
+      <h3 style="color:var(--gold-bright); text-align:center; font-size:15px;">لابی آنلاین اینترنتی</h3>
+      
+      <div class="p2p-section-title">ساخت اتاق جدید (میزبان):</div>
+      <button class="btn btn-online" onclick="createOnlineRoom()" style="padding:10px; font-size:12px;">ایجاد اتاق و دریافت کد کوتاه</button>
+      <div style="font-size:11px; color:#aaa; margin-top:3px;">کد اختصاصی شما:</div>
+      <input type="text" id="my-peer-id" readonly placeholder="در حال اتصال به سرور...">
+
+      <div class="p2p-section-title" style="margin-top:10px;">پیوستن به اتاق دوست (مهمان):</div>
+      <input type="text" id="target-peer-id" placeholder="کد کوتاه میزبان را اینجا وارد کنید">
+      <button class="btn btn-sec" onclick="joinOnlineRoom()" style="padding:10px; font-size:12px; margin-top:5px;">متصل شدن به اتاق</button>
+
+      <div id="online-status" style="font-size:11px; text-align:center; color:#2ecc71; min-height:16px;"></div>
+
+      <button class="btn btn-back" onclick="switchScreen('screen-home')" style="margin-top:10px; width:100%;">بازگشت به منو 🏠</button>
+    </div>
+  </div>
+
+  <!-- صفحه اتصال دستی P2P -->
+  <div id="screen-p2p" class="screen screen-sub">
+    <div class="lobby-box">
+      <h3 style="color:var(--gold-bright); text-align:center; font-size:15px;">اتصال مستقیم P2P (دستی)</h3>
+      
+      <div class="p2p-section-title">۱. ساخت اتاق (میزبان):</div>
+      <button class="btn btn-sec" onclick="createRoomP2P()" style="padding:8px; font-size:11px;">تولید کد آفر میزبان</button>
+      <textarea id="hostCodeOutput" readonly placeholder="کد اول برای دادن به حریف..."></textarea>
+
+      <div class="p2p-section-title">۲. پیوستن به اتاق (مهمان):</div>
+      <textarea id="guestCodeInput" placeholder="کد میزبان را اینجا پیس کنید..."></textarea>
+      <button class="btn" onclick="joinRoomP2P()" style="padding:8px; font-size:11px;">پیوستن و تولید پاسخ</button>
+      <textarea id="guestCodeOutput" readonly placeholder="کد پاسخ برای بازگرداندن..."></textarea>
+
+      <div class="p2p-section-title">۳. تایید نهایی (میزبان):</div>
+      <textarea id="hostAnswerInput" placeholder="کد پاسخ حریف را اینجا پیس کنید..."></textarea>
+      <button class="btn" onclick="confirmAnswerP2P()" style="background:#e67e22; border-bottom-color:#d35400; padding:8px; font-size:11px;">تایید نهایی و ورود به بازی 🚀</button>
+
+      <button class="btn btn-back" onclick="switchScreen('screen-home')" style="margin-top:5px; width:100%;">بازگشت به منو 🏠</button>
+    </div>
+  </div>
+
+  <!-- صفحه بازی -->
+  <div id="screen-game" class="screen">
+    <div id="topbar">
+      <div class="brand" id="game-mode-title">حکم ۴ نفره</div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <div class="scoreboard">
+          <div class="score-pill">کل: ما <b id="total-us">0</b> - آن‌ها <b id="total-them">0</b></div>
+          <div class="score-pill">دست: ما <b id="trick-us">0</b> - آن‌ها <b id="trick-them">0</b></div>
+          <div class="score-pill">حکم: <span id="hokm-suit-display">—</span></div>
+        </div>
+        <button class="btn btn-back" onclick="switchScreen('screen-home')">منو 🏠</button>
+      </div>
+    </div>
+
+    <div id="trick-toast"></div>
+    <div id="trick-winner-banner"></div>
+
+    <div id="table-wrap">
+      <div id="trick-area"></div>
+
+      <div class="seat seat-north" id="seat-2">
+        <div class="avatar">
+          <span class="hakem-badge" id="hakem-badge-2">👑</span>
+          <span class="bot-icon">🤖</span>
+          <span class="winner-badge" id="badge-2">🏆</span>
+        </div>
+        <div id="name-2">نیلوفر</div>
+        <div class="turn-indicator-text">نوبت بازی</div>
+      </div>
+
+      <div class="seat seat-west" id="seat-1">
+        <div class="avatar">
+          <span class="hakem-badge" id="hakem-badge-1">👑</span>
+          <span class="bot-icon">🤖</span>
+          <span class="winner-badge" id="badge-1">🏆</span>
+        </div>
+        <div id="name-1">رضا</div>
+        <div class="turn-indicator-text">نوبت بازی</div>
+      </div>
+
+      <div class="seat seat-east" id="seat-3">
+        <div class="avatar">
+          <span class="hakem-badge" id="hakem-badge-3">👑</span>
+          <span class="bot-icon">🤖</span>
+          <span class="winner-badge" id="badge-3">🏆</span>
+        </div>
+        <div id="name-3">امیر</div>
+        <div class="turn-indicator-text">نوبت بازی</div>
+      </div>
+
+      <div class="seat seat-south" id="seat-0">
+        <div class="avatar">
+          <span class="hakem-badge" id="hakem-badge-0">👑</span>
+          👤
+          <span class="winner-badge" id="badge-0">🏆</span>
+        </div>
+        <div id="name-0">شما</div>
+        <div class="turn-indicator-text">نوبت شما</div>
+      </div>
+    </div>
+
+    <div id="player-bottom-panel">
+      <div id="hand-container"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="modal-overlay"><div id="modal"></div></div>
+
+<script>
+(function(){
+  const SUITS=['s','h','d','c'];
+  const SUIT_SYMBOL={s:'♠', h:'♥', d:'♦', c:'♣'};
+  const SUIT_COLOR={s:'black', h:'red', d:'red', c:'black'};
+  const RANKS=[2,3,4,5,6,7,8,9,10,11,12,13,14];
+  const RANK_LABEL={11:'J', 12:'Q', 13:'K', 14:'A'};
+  const FACE_ICONS={11:'⚔️', 12:'👸', 13:'👑', 14:''};
+  const POS_CLASS={0:'played-south', 1:'played-west', 2:'played-north', 3:'played-east'};
+
+  let gameMode = 4; 
+  let gameScore = { us: 0, them: 0 };
+  let isOnlineOrP2P = false;
+
+  let state = {
+    hands: {0:[], 1:[], 2:[], 3:[]},
+    deck: [],
+    hakem: 0,
+    hokmSuit: null,
+    turn: 0,
+    trick: [],
+    tricksWon: {us:0, them:0},
+    status: 'choosingHokm',
+    isBot: {0: false, 1: true, 2: true, 3: true},
+    playerNames: {0: 'شما', 1: 'رضا', 2: 'نیلوفر', 3: 'امیر'}
+  };
+
+  let peer = null;
+  let conn = null;
+  let pcP2P = null;
+  let dataChannelP2P = null;
+  const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+  function $(id){ return document.getElementById(id); }
+
+  window.switchScreen = function(screenId){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    $(screenId).classList.add('active');
+  }
+
+  $('start-4p-btn').addEventListener('click', ()=>{
+    gameMode = 4; isOnlineOrP2P = false;
+    state.isBot = {0: false, 1: true, 2: true, 3: true};
+    setupGameUI();
+  });
+
+  $('start-2p-btn').addEventListener('click', ()=>{
+    gameMode = 2; isOnlineOrP2P = false;
+    state.isBot = {0: false, 1: false, 2: true, 3: false};
+    setupGameUI();
+  });
+
+  $('open-online-btn').addEventListener('click', ()=>{
+    switchScreen('screen-online');
+    initPeerJS();
+  });
+
+  $('open-p2p-btn').addEventListener('click', ()=>{
+    switchScreen('screen-p2p');
+  });
+
+  // --- سیستم لابی آنلاین اینترنتی با PeerJS ---
+  function initPeerJS(){
+    if(peer) return;
+    peer = new Peer();
+    peer.on('open', (id) => {
+      $('my-peer-id').value = id;
+      $('online-status').textContent = 'آماده اتصال به سرور آنلاین';
+    });
+    peer.on('connection', (c) => {
+      conn = c;
+      setupConnectionEvents();
+      $('online-status').textContent = 'حریف متصل شد! شروع بازی...';
+      isOnlineOrP2P = true;
+      gameMode = 2;
+      setTimeout(setupGameUI, 1200);
+    });
+  }
+
+  window.createOnlineRoom = function(){
+    if(!peer || !peer.id){
+      alert('لطفاً چند ثانیه صبر کنید تا اتصال برقرار شود.');
+    } else {
+      alert('کد شما آماده است. آن را به دوستتان بدهید تا وارد کند.');
+    }
+  };
+
+  window.joinOnlineRoom = function(){
+    const targetId = $('target-peer-id').value.trim();
+    if(!targetId) return alert('کد میزبان را وارد کنید');
+    
+    $('online-status').textContent = 'در حال اتصال به اتاق...';
+    conn = peer.connect(targetId);
+    setupConnectionEvents();
+  };
+
+  function setupConnectionEvents(){
+    conn.on('open', () => {
+      $('online-status').textContent = 'اتصال با موفقیت برقرار شد!';
+      isOnlineOrP2P = true;
+      gameMode = 2;
+      setTimeout(setupGameUI, 1200);
+    });
+    conn.on('data', (msg) => {
+      if(msg.type === 'playCard'){
+        playCard(msg.seat, msg.card, true);
+      } else if(msg.type === 'hokm'){
+        state.hokmSuit = msg.suit;
+        finishDealingAndStart();
+      }
+    });
+  }
+
+  // --- سیستم P2P دستی ---
+  window.createRoomP2P = function(){
+    pcP2P = new RTCPeerConnection(rtcConfig);
+    dataChannelP2P = pcP2P.createDataChannel("hokmGame");
+    setupP2PDataEvents();
+
+    pcP2P.onicecandidate = e => {
+      if(!e.candidate) {
+        $('hostCodeOutput').value = btoa(JSON.stringify(pcP2P.localDescription));
+      }
+    };
+    pcP2P.createOffer().then(o => pcP2P.setLocalDescription(o));
+  };
+
+  window.joinRoomP2P = function(){
+    const code = $('guestCodeInput').value.trim();
+    if(!code) return alert('کد را وارد کنید');
+
+    pcP2P = new RTCPeerConnection(rtcConfig);
+    pcP2P.ondatachannel = e => {
+      dataChannelP2P = e.channel;
+      setupP2PDataEvents();
+    };
+
+    const offerDesc = new RTCSessionDescription(JSON.parse(atob(code)));
+    pcP2P.setRemoteDescription(offerDesc)
+      .then(() => pcP2P.createAnswer())
+      .then(a => pcP2P.setLocalDescription(a));
+
+    pcP2P.onicecandidate = e => {
+      if(!e.candidate) {
+        $('guestCodeOutput').value = btoa(JSON.stringify(pcP2P.localDescription));
+      }
+    };
+  };
+
+  window.confirmAnswerP2P = function(){
+    const ansCode = $('hostAnswerInput').value.trim();
+    if(!ansCode) return alert('کد پاسخ را وارد کنید');
+    const ansDesc = new RTCSessionDescription(JSON.parse(atob(ansCode)));
+    pcP2P.setRemoteDescription(ansDesc).then(()=>{
+      showToast('اتصال P2P برقرار شد!');
+      isOnlineOrP2P = true;
+      gameMode = 2;
+      setTimeout(setupGameUI, 1000);
+    });
+  };
+
+  function setupP2PDataEvents(){
+    dataChannelP2P.onopen = () => {
+      showToast('کانال P2P متصل شد!');
+      isOnlineOrP2P = true;
+      gameMode = 2;
+      setTimeout(setupGameUI, 1000);
+    };
+    dataChannelP2P.onmessage = e => {
+      const msg = JSON.parse(e.data);
+      if(msg.type === 'playCard'){
+        playCard(msg.seat, msg.card, true);
+      } else if(msg.type === 'hokm'){
+        state.hokmSuit = msg.suit;
+        finishDealingAndStart();
+      }
+    };
+  }
+
+  function sendData(data){
+    if(conn && conn.open){
+      conn.send(data);
+    } else if(dataChannelP2P && dataChannelP2P.readyState === 'open'){
+      dataChannelP2P.send(JSON.stringify(data));
+    }
+  }
+
+  function setupGameUI(){
+    $('game-mode-title').textContent = gameMode === 2 ? 'حکم ۲ نفره' : 'حکم ۴ نفره';
+    if(gameMode === 2){
+      $('seat-1').style.display = 'none';
+      $('seat-2').style.display = 'flex';
+      $('seat-3').style.display = 'none';
+      state.isBot = {0: false, 1: false, 2: isOnlineOrP2P ? false : true, 3: false};
+      state.playerNames[2] = isOnlineOrP2P ? 'دوست شما' : 'نیلوفر';
+    } else {
+      $('seat-1').style.display = 'flex';
+      $('seat-2').style.display = 'flex';
+      $('seat-3').style.display = 'flex';
+      state.isBot = {0: false, 1: true, 2: true, 3: true};
+    }
+
+    switchScreen('screen-game');
+    gameScore = { us: 0, them: 0 };
+    state.hakem = 0;
+    startNewHand();
+  }
+
+  function startNewHand(){
+    let deck = [];
+    for(let s of SUITS) for(let r of RANKS) deck.push({s,r});
+    deck.sort(()=>Math.random()-0.5);
+
+    state.deck = deck;
+    state.hokmSuit = null;
+    state.trick = [];
+    state.status = 'choosingHokm';
+    state.tricksWon = {us:0, them:0};
+
+    let activeSeats = gameMode === 2 ? [0, 2] : [0, 1, 2, 3];
+    activeSeats.forEach(s => {
+      state.hands[s] = state.deck.splice(0, 5);
+    });
+
+    render();
+    if(state.hakem === 0){
+      showHokmModal();
+    } else {
+      if(isOnlineOrP2P && state.hakem === 2){
+        showToast('منتظر انتخاب حکم حریف...');
+      } else {
+        setTimeout(botChooseHokm, 1000);
+      }
+    }
+  }
+
+  function botChooseHokm(){
+    const botHand = state.hands[state.hakem];
+    const suitCounts = {s:0, h:0, d:0, c:0};
+    botHand.forEach(c => suitCounts[c.s]++);
+    let bestSuit = 's';
+    let max = -1;
+    for(let s in suitCounts){
+      if(suitCounts[s] > max){ max = suitCounts[s]; bestSuit = s; }
+    }
+    state.hokmSuit = bestSuit;
+    sendData({ type: 'hokm', suit: bestSuit });
+    showToast(`حاکم (${state.playerNames[state.hakem]}) خال ${SUIT_SYMBOL[bestSuit]} را حکم کرد.`);
+    finishDealingAndStart();
+  }
+
+  function showHokmModal(){
+    const overlay = $('modal-overlay');
+    const modal = $('modal');
+    const myCards = state.hands[0];
+    const cardsHTML = myCards.map(c => createCardHTML(c)).join('');
+
+    modal.innerHTML = `
+      <h3>👑 ۵ برگ شما برای تعیین حکم:</h3>
+      <div class="hokm-cards-preview">${cardsHTML}</div>
+      <h3>حکم را انتخاب کنید:</h3>
+      <div class="suit-choice-row">
+        ${SUITS.map(s=>`<button class="suit-btn ${SUIT_COLOR[s]}" onclick="selectHokm('${s}')">${SUIT_SYMBOL[s]}</button>`).join('')}
+      </div>
+      <div id="continue-section" style="display:none;">
+        <p style="margin: 10px 0; font-size:13px; color:#f1c40f;">با این دست ادامه می‌دهید؟</p>
+        <div class="action-btn-row">
+          <button class="btn btn-continue" onclick="confirmContinue()">ادامه بازی ▶</button>
+          <button class="btn btn-fold" onclick="foldHand()">انصراف 🏳️</button>
+        </div>
+      </div>`;
+    overlay.classList.add('open');
+  }
+
+  window.selectHokm = function(suit){
+    state.hokmSuit = suit;
+    sendData({ type: 'hokm', suit });
+    updateHokmDisplay();
+    $('continue-section').style.display = 'block';
+  };
+
+  window.confirmContinue = function(){
+    $('modal-overlay').classList.remove('open');
+    finishDealingAndStart();
+  };
+
+  window.foldHand = function(){
+    $('modal-overlay').classList.remove('open');
+    showToast('شما انصراف دادید.');
+    gameScore.them += 1;
+    state.hakem = gameMode === 2 ? (state.hakem === 0 ? 2 : 0) : (state.hakem + 1) % 4;
+    setTimeout(startNewHand, 1800);
+  };
+
+  function finishDealingAndStart(){
+    let activeSeats = gameMode === 2 ? [0, 2] : [0, 1, 2, 3];
+    activeSeats.forEach(s => {
+      let needed = 13 - state.hands[s].length;
+      if(needed > 0){
+        state.hands[s] = state.hands[s].concat(state.deck.splice(0, needed));
+      }
+      state.hands[s].sort((a,b)=>a.s.localeCompare(b.s) || a.r - b.r);
+    });
+
+    state.status = 'playing';
+    state.turn = state.hakem;
+    render();
+    checkTurn();
+  }
+
+  function checkTurn(){
+    if(state.status !== 'playing') return;
+    let activeSeats = gameMode === 2 ? [0, 2] : [0, 1, 2, 3];
+    
+    activeSeats.forEach(s => {
+      const seatEl = $('seat-'+s);
+      if(s === state.turn) seatEl.classList.add('turn-active');
+      else seatEl.classList.remove('turn-active');
+    });
+
+    if(state.isBot[state.turn] && !isOnlineOrP2P){
+      setTimeout(botPlayCard, 700);
+    }
+  }
+
+  function legalMoves(seat){
+    const hand = state.hands[seat];
+    if(state.trick.length === 0) return hand;
+    const leadSuit = state.trick[0].card.s;
+    const inSuit = hand.filter(c => c.s === leadSuit);
+    return inSuit.length > 0 ? inSuit : hand;
+  }
+
+  function botPlayCard(){
+    let maxTrickLen = gameMode === 2 ? 2 : 4;
+    if(state.trick.length >= maxTrickLen) return;
+    const seat = state.turn;
+    const valid = legalMoves(seat);
+    if(!valid || valid.length === 0) return;
+    valid.sort((a,b) => b.r - a.r);
+    playCard(seat, valid[0]);
+  }
+
+  function playCard(seat, card, fromRemote = false){
+    const idx = state.hands[seat].findIndex(c => c.s===card.s && c.r===card.r);
+    if(idx !== -1) state.hands[seat].splice(idx, 1);
+
+    state.trick.push({seat, card});
+    render();
+
+    if(seat === 0 && !fromRemote){
+      sendData({ type: 'playCard', seat, card });
+    }
+
+    let maxTrickLen = gameMode === 2 ? 2 : 4;
+    if(state.trick.length < maxTrickLen){
+      state.turn = gameMode === 2 ? (state.turn === 0 ? 2 : 0) : (state.turn + 1) % 4;
+      checkTurn();
+    } else {
+      setTimeout(resolveTrick, 1000);
+    }
+  }
+
+  function showToast(text, isError = false){
+    const toast = $('trick-toast');
+    toast.textContent = text;
+    toast.style.background = isError ? '#eb4d4b' : 'rgba(0,0,0,0.96)';
+    toast.style.display = 'block';
+    setTimeout(()=>{ toast.style.display = 'none'; }, 2200);
+  }
+
+  function showTrickWinnerBanner(winnerName){
+    const banner = $('trick-winner-banner');
+    banner.textContent = `⭐ برنده این دست: ${winnerName} ⭐`;
+    banner.style.display = 'block';
+    setTimeout(() => { banner.style.display = 'none'; }, 1500);
+  }
+
+  function resolveTrick(){
+    const hokm = state.hokmSuit;
+    let best = state.trick[0];
+
+    for(let i=1; i<state.trick.length; i++){
+      const curr = state.trick[i];
+      const b = best.card;
+      const c = curr.card;
+
+      if(c.s === hokm && b.s !== hokm){
+        best = curr;
+      } else if(c.s === b.s && c.r > b.r){
+        best = curr;
+      }
+    }
+
+    const winner = best.seat;
+    if(winner === 0 || winner === 2) {
+      state.tricksWon.us++;
+    } else {
+      state.tricksWon.them++;
+    }
+
+    showTrickWinnerBanner(state.playerNames[winner]);
+
+    state.trick = [];
+    render();
+
+    let winTarget = 7;
+    if(state.tricksWon.us === winTarget || state.tricksWon.them === winTarget || state.hands[0].length === 0){
+      if(state.tricksWon.us >= winTarget){
+        showToast('🏆 تیم شما این دست را برد!');
+        gameScore.us += 1;
+      } else {
+        showToast('😞 تیم حریف این دست را برد!');
+        gameScore.them += 1;
+      }
+
+      state.hakem = gameMode === 2 ? (state.hakem === 0 ? 2 : 0) : (state.hakem + 1) % 4;
+
+      if(gameScore.us >= 7 || gameScore.them >= 7){
+        setTimeout(()=>{
+          alert(gameScore.us >= 7 ? '🎉 تبریک! تیم شما برنده کل بازی شد!' : '❌ بازی تمام شد.');
+          gameScore = { us: 0, them: 0 };
+          state.hakem = 0;
+          startNewHand();
+        }, 1200);
+      } else {
+        setTimeout(startNewHand, 1800);
+      }
+    } else {
+      state.turn = winner;
+      render();
+      checkTurn();
+    }
+  }
+
+  window.handleCardClick = function(c){
+    if(state.turn !== 0) {
+      showToast('⚠️ هنوز نوبت شما نشده است!', true);
+      return;
+    }
+    let maxTrickLen = gameMode === 2 ? 2 : 4;
+    if(state.trick.length >= maxTrickLen) return;
+
+    const valid = legalMoves(0);
+    const isAllowed = valid.some(m => m.s === c.s && m.r === c.r);
+
+    if(!isAllowed) {
+      showToast(`⚠️ باید خال زمینه را رد کنید!`, true);
+      return;
+    }
+
+    playCard(0, c);
+  };
+
+  function updateHokmDisplay(){
+    const el = $('hokm-suit-display');
+    if(!state.hokmSuit){
+      el.textContent = '—';
+      el.className = '';
+      return;
+    }
+    el.textContent = SUIT_SYMBOL[state.hokmSuit];
+    el.className = SUIT_COLOR[state.hokmSuit];
+  }
+
+  function createCardHTML(card, extraClass = ''){
+    const rank = RANK_LABEL[card.r] || card.r;
+    const symbol = SUIT_SYMBOL[card.s];
+    const colorClass = SUIT_COLOR[card.s];
+    const faceIcon = FACE_ICONS[card.r] || '';
+
+    let centerHTML = '';
+    if(faceIcon){
+      centerHTML = `<span class="face-img">${faceIcon}</span>`;
+    } else {
+      let count = card.r;
+      let pips = '';
+      for(let i=0; i<count; i++) pips += `<span class="pip">${symbol}</span>`;
+      centerHTML = `<div class="pip-grid">${pips}</div>`;
+    }
+
+    return `
+      <div class="card ${colorClass} ${extraClass}">
+        <div class="card-corner top-left">
+          <span class="card-rank">${rank}</span>
+          <span class="card-suit-small">${symbol}</span>
+        </div>
+        <div class="card-center">${centerHTML}</div>
+        <div class="card-corner bottom-right">
+          <span class="card-rank">${rank}</span>
+          <span class="card-suit-small">${symbol}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function render(){
+    $('total-us').textContent = gameScore.us;
+    $('total-them').textContent = gameScore.them;
+    $('trick-us').textContent = state.tricksWon.us;
+    $('trick-them').textContent = state.tricksWon.them;
+    updateHokmDisplay();
+
+    let activeSeats = gameMode === 2 ? [0, 2] : [0, 1, 2, 3];
+    activeSeats.forEach(s => {
+      const badge = $('hakem-badge-'+s);
+      if(badge) badge.style.display = (s === state.hakem) ? 'flex' : 'none';
+    });
+
+    const handContainer = $('hand-container');
+    handContainer.innerHTML = '';
+    const myHand = state.hands[0] || [];
+    const validMoves = state.turn === 0 ? legalMoves(0) : [];
+
+    myHand.forEach((c) => {
+      const isAllowed = validMoves.some(m => m.s===c.s && m.r===c.r);
+      const cardWrapper = document.createElement('div');
+      cardWrapper.className = `hand-card-wrapper ${state.turn === 0 && isAllowed ? 'playable' : 'disabled'}`;
+      cardWrapper.innerHTML = createCardHTML(c);
+      cardWrapper.onclick = () => handleCardClick(c);
+      handContainer.appendChild(cardWrapper);
+    });
+
+    const trickEl = $('trick-area');
+    trickEl.innerHTML = '';
+    state.trick.forEach(t => {
+      trickEl.innerHTML += createCardHTML(t.card, POS_CLASS[t.seat]);
+    });
+  }
+})();
+</script>
+</body>
+</html>
