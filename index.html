@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>سلطان حکم</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --bg: #0a0f0d;
+  --surface: rgba(12, 22, 18, 0.88);
+  --border: rgba(212, 175, 55, 0.22);
+  --border-strong: rgba(212, 175, 55, 0.45);
+  --gold: #d4af37;
+  --gold-light: #f0d78c;
+  --gold-dim: #a68b2c;
+  --accent: #1db954;
+  --text: #f2f2f0;
+  --text-muted: #9aa89e;
+  --danger: #e74c3c;
+  --card-w: 56px;
+  --card-h: 82px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.45);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: Vazirmatn, system-ui, sans-serif; }
+button, input { font-family: inherit; }
+button { cursor: pointer; border: none; outline: none; }
+input { outline: none; }
+
+#app {
+  width: 100%; height: 100%; position: relative;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(30, 80, 50, 0.3) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 90%, rgba(50, 35, 10, 0.15) 0%, transparent 50%),
+    linear-gradient(180deg, #0c1410 0%, #060a08 100%);
+}
+
+.screen { position: absolute; inset: 0; display: none; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ========== HOME ========== */
+#screen-home {
+  align-items: center; justify-content: center; padding: 20px;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 15%, rgba(90, 45, 10, 0.35) 0%, transparent 55%),
+    linear-gradient(180deg, #1a0e08 0%, #0a0806 100%);
+}
+
+.home-content { text-align: center; width: min(92vw, 380px); }
+
+.logo-wrap { margin-bottom: 6px; }
+.logo-crown {
+  font-size: 2.4rem; display: block; margin-bottom: 4px;
+  filter: drop-shadow(0 0 18px rgba(212,175,55,0.55));
+}
+.logo {
+  font-size: 2.5rem; font-weight: 900; letter-spacing: -1px;
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 45%, #c9a227 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  filter: drop-shadow(0 2px 10px rgba(212, 175, 55, 0.3));
+}
+.subtitle {
+  color: var(--text-muted); font-size: 0.8rem; font-weight: 400;
+  margin-bottom: 28px; letter-spacing: 0.4px;
+}
+
+.menu-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 18px 16px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(24px);
+}
+
+.btn {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin: 5px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: linear-gradient(145deg, #22c55e, #16a34a);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(34, 197, 94, 0.28);
+}
+.btn-blue {
+  background: linear-gradient(145deg, #3b82f6, #2563eb);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(59, 130, 246, 0.28);
+}
+.btn-gold {
+  background: linear-gradient(145deg, #eab308, #ca8a04);
+  color: #1a1200;
+  box-shadow: 0 4px 18px rgba(234, 179, 8, 0.22);
+}
+.btn-ghost {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.btn-danger {
+  background: linear-gradient(145deg, #ef4444, #dc2626);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.22);
+}
+.btn-sm { padding: 10px 14px; font-size: 0.82rem; border-radius: 12px; }
+
+/* ========== ONLINE ========== */
+#screen-online {
+  align-items: center; justify-content: center; padding: 16px;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 25%, rgba(50, 25, 70, 0.25) 0%, transparent 60%),
+    linear-gradient(180deg, #0e0a14 0%, #060508 100%);
+}
+
+.panel {
+  width: min(94vw, 400px);
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 22px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(24px);
+}
+.panel::-webkit-scrollbar { width: 3px; }
+.panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.panel-title {
+  font-size: 1.1rem; font-weight: 800; color: var(--gold-light);
+  text-align: center; margin-bottom: 4px;
+}
+.panel-desc {
+  text-align: center; color: var(--text-muted); font-size: 0.72rem;
+  line-height: 1.7; margin-bottom: 16px;
+}
+
+.tabs {
+  display: flex; gap: 4px; margin-bottom: 16px;
+  background: rgba(0,0,0,0.35); border-radius: 12px; padding: 3px;
+}
+.tab {
+  flex: 1; padding: 9px; border-radius: 10px;
+  background: transparent; color: var(--text-muted);
+  font-weight: 600; font-size: 0.82rem; text-align: center;
+  transition: all 0.15s ease;
+}
+.tab.active {
+  background: linear-gradient(145deg, rgba(212,175,55,0.18), rgba(212,175,55,0.06));
+  color: var(--gold-light);
+  border: 1px solid var(--border);
+}
+
+.field { margin-bottom: 11px; }
+.field label {
+  display: block; color: var(--gold-dim); font-size: 0.7rem;
+  font-weight: 600; margin-bottom: 5px;
+}
+.field input {
+  width: 100%; padding: 11px 13px; border-radius: 12px;
+  border: 1px solid rgba(212,175,55,0.18);
+  background: rgba(0,0,0,0.4); color: var(--text);
+  text-align: center; font-size: 0.92rem; letter-spacing: 1px;
+  transition: border-color 0.15s;
+}
+.field input:focus { border-color: var(--gold); }
+
+.room-card {
+  margin: 12px 0; padding: 14px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  text-align: center;
+}
+.room-card .label { font-size: 0.68rem; color: var(--text-muted); margin-bottom: 5px; }
+.room-card .code {
+  font-size: 1.5rem; font-weight: 800; letter-spacing: 5px;
+  color: var(--gold-light); font-variant-numeric: tabular-nums;
+}
+.room-card .name {
+  margin-top: 7px; font-size: 0.85rem; font-weight: 600; color: var(--gold);
+}
+
+.players-box {
+  margin: 10px 0; padding: 8px 10px;
+  background: rgba(0,0,0,0.28); border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.player-row {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 3px; font-size: 0.82rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.player-row:last-child { border-bottom: none; }
+.player-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(29,185,84,0.45);
+}
+.player-dot.empty { background: #444; box-shadow: none; }
+.player-name { flex: 1; color: var(--text); }
+.player-tag {
+  font-size: 0.6rem; padding: 2px 6px; border-radius: 6px;
+  background: rgba(212,175,55,0.12); color: var(--gold);
+  font-weight: 600;
+}
+
+.status-msg {
+  text-align: center; color: var(--accent); font-size: 0.72rem;
+  min-height: 18px; margin: 8px 0; line-height: 1.5;
+}
+
+/* ========== GAME ========== */
+#screen-game { background: transparent; overflow: hidden; }
+
+#topbar {
+  height: 50px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 10px;
+  background: rgba(6, 10, 8, 0.94);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  z-index: 50;
+}
+.menu-btn {
+  width: 36px; height: 36px; border-radius: 11px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--gold-light); font-size: 1.05rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.menu-btn:active { background: rgba(212,175,55,0.12); }
+.brand {
+  font-weight: 800; font-size: 0.82rem;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.score-pills { display: flex; gap: 4px; align-items: center; }
+.pill {
+  padding: 4px 8px; border-radius: 9px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(212,175,55,0.18);
+  font-size: 0.68rem; white-space: nowrap; font-weight: 500;
+}
+.pill b { color: var(--gold-light); font-weight: 700; }
+.pill-hokm {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 10px 3px 6px;
+  min-width: 54px; justify-content: center;
+}
+.pill-hokm .hokm-icon {
+  width: 26px; height: 26px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.05rem; font-weight: 900;
+  background: #fff;
+  box-shadow: 0 0 14px rgba(212,175,55,0.4), 0 2px 6px rgba(0,0,0,0.3);
+  line-height: 1;
+}
+.pill-hokm .hokm-icon.red { color: #c41e3a; border: 1.5px solid rgba(196,30,58,0.3); }
+.pill-hokm .hokm-icon.black { color: #1a1a1a; border: 1.5px solid rgba(0,0,0,0.12); }
+.pill-hokm .hokm-icon.empty {
+  background: rgba(255,255,255,0.08); color: #666;
+  border: 1px dashed rgba(255,255,255,0.15); font-size: 0.75rem;
+  box-shadow: none;
+}
+.pill-hokm .hokm-label { font-size: 0.62rem; color: var(--text-muted); }
+
+#table-wrap { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+
+.table-felt {
+  position: absolute;
+  width: min(92vw, 560px); height: min(66vh, 420px);
+  left: 50%; top: 47%; transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, #1a6b45 0%, #0d3d28 45%, #062016 100%);
+  border: 12px solid #2a1a0c;
+  box-shadow:
+    inset 0 0 50px rgba(0,0,0,0.5),
+    0 0 0 3px #5c3d1a,
+    0 20px 50px rgba(0,0,0,0.55);
+}
+.table-felt::after {
+  content: ""; position: absolute; inset: 14px;
+  border: 1px solid rgba(212,175,55,0.1); border-radius: 50%;
+  pointer-events: none;
+}
+
+.seat {
+  position: absolute; z-index: 10;
+  display: flex; flex-direction: column; align-items: center;
+  font-size: 0.7rem; font-weight: 600; text-shadow: 0 1px 4px #000;
+}
+.seat .avatar {
+  width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(145deg, #2a2a2a, #111);
+  border: 2.5px solid #8a6d2e;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.45);
+  font-size: 1.25rem;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  position: relative;
+}
+.seat.active .avatar {
+  border-color: #fff;
+  box-shadow: 0 0 20px rgba(255, 215, 90, 0.55);
+  transform: scale(1.1);
+}
+.seat.active::after {
+  content: "نوبت"; color: var(--gold-light); font-size: 0.58rem;
+  background: rgba(0,0,0,0.85); border: 1px solid var(--border-strong);
+  padding: 2px 7px; border-radius: 7px; margin-top: 3px;
+  font-weight: 700;
+}
+.south { bottom: 128px; left: 50%; transform: translateX(-50%); }
+.north { top: 12px; left: 50%; transform: translateX(-50%); }
+.west { left: 8px; top: 42%; transform: translateY(-50%); }
+.east { right: 8px; top: 42%; transform: translateY(-50%); }
+
+.badge {
+  position: absolute; top: -6px; left: -6px;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  color: #1a1200; border-radius: 50%;
+  width: 19px; height: 19px;
+  display: none; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 800;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+}
+
+#trick-area {
+  position: absolute; left: 50%; top: 43%;
+  width: 210px; height: 155px;
+  transform: translate(-50%, -50%); z-index: 20;
+}
+.played {
+  position: absolute; width: var(--card-w); height: var(--card-h);
+  opacity: 0;
+  transition: transform 0.28s cubic-bezier(0.2, 0.85, 0.2, 1), opacity 0.2s ease;
+  pointer-events: none;
+}
+.played.show { opacity: 1; }
+.played.south { left: 77px; top: 70px; }
+.played.north { left: 77px; top: 2px; }
+.played.west { left: 6px; top: 38px; }
+.played.east { right: 6px; top: 38px; }
+
+/* Real card images */
+.card {
+  width: var(--card-w); height: var(--card-h);
+  position: relative; border-radius: 6px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.4),
+    0 1px 2px rgba(0,0,0,0.25);
+  background: #f5f5f5;
+  direction: ltr;
+}
+.card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+/* fallback drawn card if image fails */
+.card.fallback {
+  background: linear-gradient(165deg, #ffffff 0%, #f0f0f0 100%);
+  border: 1px solid #bbb;
+  color: #1a1a1a;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.card.fallback.red { color: #c41e3a; }
+.card.fallback .fb-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 16px; gap: 2px;
+}
+.card.fallback .fb-rank { font-size: 14px; }
+.card.fallback .fb-suit { font-size: 18px; }
+
+#bottom-panel {
+  position: absolute; z-index: 100;
+  left: 50%; bottom: 0; transform: translateX(-50%);
+  width: min(100%, 660px); height: 120px;
+  padding: 5px 0 0;
+  background: linear-gradient(180deg, rgba(8, 22, 16, 0.96), rgba(4, 12, 9, 0.98));
+  border-top: 1px solid var(--border);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 28px rgba(0,0,0,0.45);
+  overflow: visible;
+}
+#hand {
+  height: 112px; width: 100%;
+  position: relative; display: flex; justify-content: center; align-items: flex-end;
+  direction: ltr; overflow: visible;
+}
+.hand-card {
+  position: absolute; bottom: 7px;
+  width: var(--card-w); height: var(--card-h);
+  transition: transform 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+  cursor: pointer; touch-action: manipulation;
+}
+.hand-card.disabled { filter: grayscale(0.55); opacity: 0.4; }
+.hand-card.playable .card {
+  box-shadow: 0 0 0 2.5px #22c55e, 0 0 16px rgba(34, 197, 94, 0.45), 0 2px 6px rgba(0,0,0,0.3);
+  transform: translateY(-2px);
+}
+.hand-card.selected { z-index: 50; }
+.hand-card.selected .card {
+  box-shadow: 0 0 0 2.5px #ffd75a, 0 0 22px rgba(255, 215, 90, 0.5), 0 4px 12px rgba(0,0,0,0.35);
+}
+
+#toast {
+  position: absolute; z-index: 250; top: 58px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.92); border: 1px solid var(--border-strong);
+  padding: 8px 16px; border-radius: 18px; font-size: 0.78rem;
+  display: none; white-space: nowrap; font-weight: 500;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+}
+#banner {
+  position: absolute; z-index: 240; left: 50%; top: 40%;
+  transform: translate(-50%, -50%) scale(0.96);
+  background: rgba(0,0,0,0.92); border: 1px solid var(--gold);
+  color: var(--gold-light); padding: 11px 20px; border-radius: 16px;
+  font-size: 0.88rem; font-weight: 800; display: none;
+  box-shadow: 0 0 36px rgba(212,175,55,0.18);
+}
+
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  z-index: 300; display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(10px);
+}
+.modal-bg.open { display: flex; }
+.modal {
+  width: min(92vw, 370px); padding: 22px 18px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, #122a1e, #0a1610);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+  text-align: center;
+}
+.modal h3 {
+  color: var(--gold-light); font-size: 1rem; font-weight: 800;
+  margin-bottom: 14px;
+}
+.preview {
+  display: flex; justify-content: center; gap: 5px;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.suits { display: flex; justify-content: center; gap: 12px; }
+.suit {
+  width: 56px; height: 56px; border: none; border-radius: 14px;
+  background: #fff; font-size: 1.6rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.28);
+  transition: transform 0.12s;
+}
+.suit:active { transform: scale(0.92); }
+.suit.red { color: #c41e3a; }
+.suit.black { color: #1c1c1c; }
+
+.menu-list { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+.menu-list .btn { margin: 0; }
+
+/* Pass & play overlay */
+.pass-overlay {
+  position: absolute; inset: 0; z-index: 200;
+  background: rgba(4, 10, 8, 0.94);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px; text-align: center;
+  backdrop-filter: blur(8px);
+}
+.pass-overlay.show { display: flex; }
+.pass-overlay .pass-icon { font-size: 3rem; margin-bottom: 12px; }
+.pass-overlay .pass-name {
+  font-size: 1.4rem; font-weight: 800; color: var(--gold-light);
+  margin-bottom: 8px;
+}
+.pass-overlay .pass-hint {
+  color: var(--text-muted); font-size: 0.85rem; margin-bottom: 22px;
+  line-height: 1.6;
+}
+
+@media (max-width: 400px) {
+  :root { --card-w: 48px; --card-h: 70px; }
+  .logo { font-size: 2.1rem; }
+  .logo-crown { font-size: 2rem; }
+  #bottom-panel { height: 108px; }
+  #hand { height: 100px; }
+  .played.south, .played.north { left: 80px; }
+  .played.south { top: 72px; }
+  .played.north { top: 3px; }
+  .rank { font-size: 12px; }
+  .cs { font-size: 10px; }
+  .face { font-size: 22px; }
+  .seat .avatar { width: 42px; height: 42px; font-size: 1.1rem; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- HOME -->
+  <section id="screen-home" class="screen active">
+    <div class="home-content">
+      <div class="logo-wrap">
+        <span class="logo-crown">👑</span>
+        <div class="logo">سلطان حکم</div>
+      </div>
+      <div class="subtitle">نسخه مدرن • سریع • روان</div>
+      <div class="menu-card">
+        <button class="btn btn-primary" id="start4">🤖 ۴ نفره با ربات</button>
+        <button class="btn btn-blue" id="start2">🤖 ۲ نفره با ربات</button>
+        <button class="btn btn-gold" id="wifiPlay">📡 وای‌فای محلی (بدون اینترنت)</button>
+        <button class="btn btn-gold" id="localPlay" style="background:linear-gradient(145deg,#64748b,#475569);box-shadow:0 4px 14px rgba(0,0,0,0.2)">📱 یک دستگاه (دست‌به‌دست)</button>
+        <button class="btn btn-gold" id="online" style="background:linear-gradient(145deg,#6366f1,#4f46e5);box-shadow:0 4px 18px rgba(99,102,241,0.28)">🌐 آنلاین اینترنتی</button>
+        <button class="btn btn-ghost" id="inviteBtn">👥 معرفی به دوستان</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCAL / PASS & PLAY -->
+  <section id="screen-local" class="screen">
+    <div class="panel">
+      <div class="panel-title">📱 آفلاین چندنفره</div>
+      <div class="panel-desc">بدون اینترنت — همه روی همین گوشی<br>هر نفر نوبتش که شد گوشی را می‌گیرد و بازی می‌کند</div>
+
+      <div class="field">
+        <label>تعداد بازیکن</label>
+        <div class="tabs" style="margin-bottom:0">
+          <button class="tab active" id="localMode2">⚔️ ۲ نفره</button>
+          <button class="tab" id="localMode4">👥 ۴ نفره</button>
+        </div>
+      </div>
+
+      <div id="localNames">
+        <div class="field"><label>نام بازیکن ۱ (شما)</label><input id="ln0" value="بازیکن ۱" maxlength="12"></div>
+        <div class="field" id="lf1" style="display:none"><label>نام بازیکن ۲</label><input id="ln1" value="بازیکن ۲" maxlength="12"></div>
+        <div class="field" id="lf2"><label>نام بازیکن ۲ (حریف)</label><input id="ln2" value="بازیکن ۲" maxlength="12"></div>
+        <div class="field" id="lf3" style="display:none"><label>نام بازیکن ۳</label><input id="ln3" value="بازیکن ۳" maxlength="12"></div>
+      </div>
+
+      <button class="btn btn-primary" id="startLocal">شروع بازی آفلاین</button>
+      <div class="status-msg" style="color:var(--text-muted);margin-top:8px">💡 وقتی نوبت کسی شد، گوشی را به او بدهید</div>
+      <button class="btn btn-danger btn-sm" onclick="goHome()" style="margin-top:8px">بازگشت</button>
+    </div>
+  </section>
+
+  <!-- WIFI / LAN P2P -->
+  <section id="screen-wifi" class="screen">
+    <div class="panel">
+      <div class="panel-title">📡 وای‌فای محلی</div>
+      <div class="panel-desc">
+        هر دو روی یک وای‌فای یا هات‌اسپات باشید<br>
+        <b style="color:var(--gold-light)">بدون نیاز به اینترنت</b> — اتصال مستقیم گوشی به گوشی
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" id="wifiHostTab">من میزبانم</button>
+        <button class="tab" id="wifiJoinTab">وصل می‌شوم</button>
+      </div>
+
+      <!-- HOST -->
+      <div id="wifiHostPane">
+        <div class="field">
+          <label>نام شما</label>
+          <input id="wifiHostName" placeholder="مثلاً محمد" maxlength="15">
+        </div>
+        <button class="btn btn-gold" id="wifiCreate">ساخت اتاق و گرفتن کد</button>
+        <div class="room-card" id="wifiOfferBox" style="display:none">
+          <div class="label">کد اتصال را برای دوست بفرستید</div>
+          <textarea id="wifiOfferCode" readonly style="width:100%;height:90px;margin-top:8px;padding:10px;border-radius:12px;background:#000;color:var(--gold-light);font-size:0.7rem;border:1px solid var(--border);resize:none;direction:ltr;text-align:left"></textarea>
+          <button class="btn btn-sm btn-blue" id="wifiCopyOffer" style="margin-top:8px">کپی کد</button>
+        </div>
+        <div class="field" id="wifiAnswerField" style="display:none">
+          <label>کد پاسخ دوست را اینجا بچسبانید</label>
+          <textarea id="wifiAnswerInput" placeholder="کد پاسخ را اینجا paste کنید" style="width:100%;height:80px;padding:10px;border-radius:12px;background:rgba(0,0,0,0.4);color:#fff;font-size:0.7rem;border:1px solid var(--border);resize:none;direction:ltr;text-align:left"></textarea>
+          <button class="btn btn-primary" id="wifiAcceptAnswer" style="margin-top:8px">تأیید و شروع اتصال</button>
+        </div>
+      </div>
+
+      <!-- JOIN -->
+      <div id="wifiJoinPane" style="display:none">
+        <div class="field">
+          <label>نام شما</label>
+          <input id="wifiJoinName" placeholder="نام خود را بنویسید" maxlength="15">
+        </div>
+        <div class="field">
+          <label>کد میزبان را بچسبانید</label>
+          <textarea id="wifiJoinOffer" placeholder="کد اتصال میزبان" style="width:100%;height:80px;padding:10px;border-radius:12px;background:rgba(0,0,0,0.4);color:#fff;font-size:0.7rem;border:1px solid var(--border);resize:none;direction:ltr;text-align:left"></textarea>
+        </div>
+        <button class="btn btn-blue" id="wifiDoJoin">وصل شو و بگیر کد پاسخ</button>
+        <div class="room-card" id="wifiAnswerBox" style="display:none">
+          <div class="label">این کد پاسخ را برای میزبان بفرستید</div>
+          <textarea id="wifiAnswerCode" readonly style="width:100%;height:90px;margin-top:8px;padding:10px;border-radius:12px;background:#000;color:var(--gold-light);font-size:0.7rem;border:1px solid var(--border);resize:none;direction:ltr;text-align:left"></textarea>
+          <button class="btn btn-sm btn-blue" id="wifiCopyAnswer" style="margin-top:8px">کپی کد پاسخ</button>
+          <div class="status-msg" style="margin-top:8px">منتظر تأیید میزبان بمانید...</div>
+        </div>
+      </div>
+
+      <div class="status-msg" id="wifiStatus"></div>
+      <div class="panel-desc" style="margin-top:8px;font-size:0.68rem;color:var(--text-muted)">
+        ۱) یکی هات‌اسپات روشن کند یا هر دو به یک وای‌فای وصل شوند<br>
+        ۲) میزبان کد می‌سازد و می‌فرستد<br>
+        ۳) مهمان کد را می‌زند، کد پاسخ می‌گیرد و برمی‌گرداند<br>
+        ۴) میزبان کد پاسخ را تأیید می‌کند → بازی شروع
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="goHome()" style="margin-top:6px">بازگشت</button>
+    </div>
+  </section>
+
+  <!-- ONLINE LOBBY -->
+  <section id="screen-online" class="screen">
+    <div class="panel">
+      <div class="panel-title">🌐 بازی آنلاین با دوست</div>
+      <div class="panel-desc">اتاق بسازید و کد را برای دوستتان بفرستید<br>با وارد کردن کد مستقیم وارد اتاق می‌شود</div>
+
+      <div class="tabs">
+        <button class="tab active" id="tabCreate">ساخت اتاق</button>
+        <button class="tab" id="tabJoin">پیوستن</button>
+      </div>
+
+      <div id="createPane">
+        <div class="field">
+          <label>نوع بازی</label>
+          <div class="tabs" style="margin-bottom:0">
+            <button class="tab active" id="mode2Btn">⚔️ ۲ نفره</button>
+            <button class="tab" id="mode4Btn">👥 ۴ نفره</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>نام اتاق</label>
+          <input id="roomNameInput" placeholder="مثلاً محمد" maxlength="20">
+        </div>
+        <button class="btn btn-gold" id="createRoom">ساخت اتاق و گرفتن کد</button>
+
+        <div class="room-card" id="roomInfo" style="display:none">
+          <div class="label">کد اتاق (۶ رقمی)</div>
+          <div class="code" id="roomCode">————</div>
+          <div class="name" id="displayRoomName"></div>
+        </div>
+
+        <div class="players-box" id="hostPlayers" style="display:none">
+          <div class="player-row"><span class="player-dot"></span><span class="player-name" id="p0">شما</span><span class="player-tag">میزبان</span></div>
+          <div class="player-row"><span class="player-dot empty" id="d1"></span><span class="player-name" id="p1">صندلی خالی</span></div>
+          <div class="player-row" id="row2"><span class="player-dot empty" id="d2"></span><span class="player-name" id="p2">صندلی خالی</span></div>
+          <div class="player-row" id="row3"><span class="player-dot empty" id="d3"></span><span class="player-name" id="p3">صندلی خالی</span></div>
+        </div>
+        <button class="btn btn-primary" id="startOnlineGame" style="display:none;margin-top:6px">شروع بازی</button>
+      </div>
+
+      <div id="joinPane" style="display:none">
+        <div class="field">
+          <label>کد ۶ رقمی اتاق</label>
+          <input id="joinCode" placeholder="مثلاً ۴۸۲۹۱۷" maxlength="20" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>نام شما</label>
+          <input id="joinName" placeholder="نام خود را بنویسید" maxlength="15">
+        </div>
+        <button class="btn btn-blue" id="joinRoom">جستجو و پیوستن</button>
+      </div>
+
+      <div class="status-msg" id="onlineStatus"></div>
+      <button class="btn btn-danger btn-sm" onclick="goHome()" style="margin-top:6px">بازگشت</button>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="screen-game" class="screen">
+    <div id="topbar">
+      <button class="menu-btn" id="gameMenuBtn">☰</button>
+      <div class="brand">👑 سلطان حکم</div>
+      <div class="score-pills">
+        <div class="pill">کل <b id="totalUs">0</b>–<b id="totalThem">0</b></div>
+        <div class="pill">دست <b id="trickUs">0</b>–<b id="trickThem">0</b></div>
+        <div class="pill pill-hokm" id="hokmPill">
+          <span class="hokm-label">حکم</span>
+          <span class="hokm-icon empty" id="hokm">—</span>
+        </div>
+      </div>
+    </div>
+    <div id="toast"></div>
+    <div id="banner"></div>
+    <div class="pass-overlay" id="passOverlay">
+      <div class="pass-icon">📱</div>
+      <div class="pass-name" id="passName">نوبت بازیکن</div>
+      <div class="pass-hint">گوشی را به این بازیکن بدهید<br>سپس دکمه زیر را بزند</div>
+      <button class="btn btn-primary" id="passConfirm" style="width:auto;padding:14px 28px">من آماده‌ام — نمایش کارت‌ها</button>
+    </div>
+    <div id="table-wrap">
+      <div class="table-felt"></div>
+      <div class="seat north" id="seat2">
+        <div class="avatar">🤖<span class="badge" id="hakem2">👑</span></div>
+        <span id="name2">بازیکن ۲</span>
+      </div>
+      <div class="seat west" id="seat1">
+        <div class="avatar">🤖<span class="badge" id="hakem1">👑</span></div>
+        <span id="name1">بازیکن ۱</span>
+      </div>
+      <div class="seat east" id="seat3">
+        <div class="avatar">🤖<span class="badge" id="hakem3">👑</span></div>
+        <span id="name3">بازیکن ۳</span>
+      </div>
+      <div class="seat south" id="seat0">
+        <div class="avatar">👤<span class="badge" id="hakem0">👑</span></div>
+        <span id="name0">شما</span>
+      </div>
+      <div id="trick-area"></div>
+      <div id="bottom-panel"><div id="hand"></div></div>
+    </div>
+  </section>
+</div>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+
+<script>
+(() => {
+const SUITS = ['s','h','d','c'];
+const SYM = {s:'♠', h:'♥', d:'♦', c:'♣'};
+const COLOR = {s:'black', h:'red', d:'red', c:'black'};
+const RANKS = [2,3,4,5,6,7,8,9,10,11,12,13,14];
+const LABEL = {11:'J', 12:'Q', 13:'K', 14:'A'};
+/* Court cards: classic letter + suit (no cartoon emoji) */
+const $ = id => document.getElementById(id);
+
+let mode = 4, online = false, local = false, wifi = false, mySeat = 0, peer = null, conns = {};
+let roomCode = '', roomName = '', isHost = false;
+let lobbyMode = 2;
+let localMode = 2;
+let rtcPc = null, rtcChannel = null;
+let score = {us:0, them:0};
+let state = {
+  hands: {0:[],1:[],2:[],3:[]}, deck: [], hakem: 0, hokm: null, turn: 0, trick: [],
+  won: {us:0, them:0}, status: 'idle',
+  isBot: {0:false,1:true,2:true,3:true},
+  names: {0:'شما',1:'بازیکن ۱',2:'بازیکن ۲',3:'بازیکن ۳'},
+  seatsFilled: {0:true,1:false,2:false,3:false}
+};
+
+window.goHome = () => {
+  closeModal();
+  hidePassOverlay();
+  if (peer) { try { peer.destroy(); } catch(e) {} peer = null; }
+  if (rtcPc) { try { rtcPc.close(); } catch(e) {} rtcPc = null; }
+  rtcChannel = null;
+  conns = {}; online = false; local = false; wifi = false; isHost = false;
+  switchScreen('screen-home');
+};
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(x => x.classList.remove('active'));
+  $(id).classList.add('active');
+}
+function toast(t, error = false) {
+  const el = $('toast');
+  el.textContent = t; el.style.display = 'block';
+  el.style.borderColor = error ? 'var(--danger)' : 'var(--border-strong)';
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => el.style.display = 'none', 2000);
+}
+function banner(t) {
+  const el = $('banner');
+  el.textContent = t; el.style.display = 'block';
+  clearTimeout(banner.t);
+  banner.t = setTimeout(() => el.style.display = 'none', 1200);
+}
+function closeModal() { $('modalBg').classList.remove('open'); }
+
+$('start4').onclick = () => {
+  mode = 4; online = false; local = false;
+  state.isBot = {0:false,1:true,2:true,3:true};
+  state.names = {0:'شما',1:'ربات ۱',2:'ربات ۲',3:'ربات ۳'};
+  setup();
+};
+$('start2').onclick = () => {
+  mode = 2; online = false; local = false;
+  state.isBot = {0:false,1:false,2:true,3:false};
+  state.names = {0:'شما',1:'',2:'ربات',3:''};
+  setup();
+};
+$('online').onclick = () => { switchScreen('screen-online'); resetOnlineUI(); initPeer(); };
+$('wifiPlay').onclick = () => {
+  switchScreen('screen-wifi');
+  resetWifiUI();
+};
+$('localPlay').onclick = () => {
+  switchScreen('screen-local');
+  localMode = 2;
+  $('localMode2').classList.add('active');
+  $('localMode4').classList.remove('active');
+  updateLocalFields();
+};
+$('inviteBtn').onclick = () => {
+  const text = '👑 بیا سلطان حکم بازی کنیم!\nنسخه مدرن و ۲/۴ نفره آنلاین 🎴';
+  if (navigator.share) navigator.share({title:'سلطان حکم', text}).catch(()=>{});
+  else { navigator.clipboard?.writeText(text); toast('متن معرفی کپی شد'); }
+};
+
+/* ========== WIFI / LAN WebRTC P2P (no internet) ========== */
+function resetWifiUI() {
+  $('wifiHostPane').style.display = 'block';
+  $('wifiJoinPane').style.display = 'none';
+  $('wifiHostTab').classList.add('active');
+  $('wifiJoinTab').classList.remove('active');
+  $('wifiOfferBox').style.display = 'none';
+  $('wifiAnswerField').style.display = 'none';
+  $('wifiAnswerBox').style.display = 'none';
+  $('wifiOfferCode').value = '';
+  $('wifiAnswerInput').value = '';
+  $('wifiJoinOffer').value = '';
+  $('wifiAnswerCode').value = '';
+  $('wifiStatus').textContent = '';
+  if (rtcPc) { try { rtcPc.close(); } catch(e) {} rtcPc = null; }
+  rtcChannel = null;
+}
+$('wifiHostTab').onclick = () => {
+  $('wifiHostPane').style.display = 'block';
+  $('wifiJoinPane').style.display = 'none';
+  $('wifiHostTab').classList.add('active');
+  $('wifiJoinTab').classList.remove('active');
+};
+$('wifiJoinTab').onclick = () => {
+  $('wifiHostPane').style.display = 'none';
+  $('wifiJoinPane').style.display = 'block';
+  $('wifiHostTab').classList.remove('active');
+  $('wifiJoinTab').classList.add('active');
+};
+
+function encodeSDP(sdp) {
+  // Compact base64 for sharing
+  try {
+    return btoa(unescape(encodeURIComponent(sdp))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  } catch(e) { return btoa(sdp); }
+}
+function decodeSDP(str) {
+  try {
+    str = str.trim().replace(/-/g,'+').replace(/_/g,'/');
+    while (str.length % 4) str += '=';
+    return decodeURIComponent(escape(atob(str)));
+  } catch(e) {
+    try { return atob(str); } catch(e2) { return null; }
+  }
+}
+
+function createPeerConnection() {
+  // No STUN/TURN → works on same LAN / hotspot only (true offline)
+  const pc = new RTCPeerConnection({ iceServers: [] });
+  pc.onicecandidate = (e) => {
+    // Wait until gathering done; we use complete SDP after icegatheringstatechange
+  };
+  return pc;
+}
+
+function waitIceComplete(pc) {
+  return new Promise((resolve) => {
+    if (pc.iceGatheringState === 'complete') return resolve();
+    const check = () => {
+      if (pc.iceGatheringState === 'complete') {
+        pc.removeEventListener('icegatheringstatechange', check);
+        resolve();
+      }
+    };
+    pc.addEventListener('icegatheringstatechange', check);
+    // Fallback timeout
+    setTimeout(resolve, 2500);
+  });
+}
+
+function setupWifiChannel(channel, host) {
+  rtcChannel = channel;
+  channel.binaryType = 'arraybuffer';
+  channel.onopen = () => {
+    $('wifiStatus').textContent = '✅ متصل شدید!';
+    toast('اتصال برقرار شد');
+    wifi = true; online = true; local = false; mode = 2;
+    if (host) {
+      isHost = true; mySeat = 0;
+      state.isBot = {0:false,1:false,2:false,3:false};
+      const hostName = ($('wifiHostName').value || '').trim() || 'میزبان';
+      state.names = {0: hostName, 1:'', 2: 'حریف', 3:''};
+      state.seatsFilled = {0:true,1:false,2:true,3:false};
+      setTimeout(() => {
+        setup();
+        wifiSend({type:'state', state: packState(), mySeat: 2, mode: 2});
+      }, 500);
+    } else {
+      isHost = false; mySeat = 2;
+      const name = ($('wifiJoinName').value || '').trim() || 'مهمان';
+      wifiSend({type:'join', name});
+      $('wifiStatus').textContent = 'متصل — منتظر شروع بازی...';
+    }
+  };
+  channel.onclose = () => toast('اتصال قطع شد', true);
+  channel.onerror = () => toast('خطای اتصال', true);
+  channel.onmessage = (ev) => {
+    try {
+      const m = JSON.parse(ev.data);
+      if (host) wifiHostMessage(m);
+      else wifiGuestMessage(m);
+    } catch(e) {}
+  };
+}
+
+function wifiSend(obj) {
+  if (rtcChannel && rtcChannel.readyState === 'open') {
+    rtcChannel.send(JSON.stringify(obj));
+  }
+}
+function wifiHostMessage(m) {
+  if (m.type === 'join') {
+    state.names[2] = m.name || 'حریف';
+    toast(state.names[2] + ' وصل شد');
+  }
+  if (m.type === 'play' && m.seat === 2 && state.turn === 2) playCard(2, m.card, true);
+  if (m.type === 'hokm' && state.hakem === 2) { state.hokm = m.suit; finish(); wifiSend({type:'state', state: packState()}); }
+}
+function wifiGuestMessage(m) {
+  if (m.type === 'state') {
+    state = m.state;
+    if (m.mySeat != null) mySeat = m.mySeat;
+    if (m.mode) mode = m.mode;
+    const jn = ($('wifiJoinName').value || '').trim();
+    if (jn) state.names[mySeat] = jn;
+    switchScreen('screen-game');
+    render();
+    checkTurn();
+  }
+}
+
+$('wifiCreate').onclick = async () => {
+  try {
+    $('wifiStatus').textContent = 'در حال ساخت اتاق...';
+    rtcPc = createPeerConnection();
+    const channel = rtcPc.createDataChannel('hokm', {ordered: true});
+    setupWifiChannel(channel, true);
+    const offer = await rtcPc.createOffer();
+    await rtcPc.setLocalDescription(offer);
+    await waitIceComplete(rtcPc);
+    const code = encodeSDP(rtcPc.localDescription.sdp);
+    $('wifiOfferCode').value = code;
+    $('wifiOfferBox').style.display = 'block';
+    $('wifiAnswerField').style.display = 'block';
+    $('wifiStatus').textContent = 'کد را برای دوست بفرستید، بعد کد پاسخ او را وارد کنید';
+  } catch(e) {
+    $('wifiStatus').textContent = 'خطا: ' + (e.message || e);
+    toast('خطا در ساخت اتصال', true);
+  }
+};
+
+$('wifiCopyOffer').onclick = () => {
+  const t = $('wifiOfferCode').value;
+  navigator.clipboard?.writeText(t).then(() => toast('کد کپی شد')).catch(() => toast('دستی کپی کنید'));
+};
+
+$('wifiAcceptAnswer').onclick = async () => {
+  const raw = ($('wifiAnswerInput').value || '').trim();
+  if (!raw) { toast('کد پاسخ را وارد کنید', true); return; }
+  const sdp = decodeSDP(raw);
+  if (!sdp || !rtcPc) { toast('کد نامعتبر است', true); return; }
+  try {
+    await rtcPc.setRemoteDescription({type: 'answer', sdp});
+    $('wifiStatus').textContent = 'در حال اتصال...';
+  } catch(e) {
+    toast('خطا در تأیید پاسخ', true);
+    $('wifiStatus').textContent = 'خطا: ' + (e.message || e);
+  }
+};
+
+$('wifiDoJoin').onclick = async () => {
+  const raw = ($('wifiJoinOffer').value || '').trim();
+  if (!raw) { toast('کد میزبان را وارد کنید', true); return; }
+  const sdp = decodeSDP(raw);
+  if (!sdp) { toast('کد نامعتبر است', true); return; }
+  try {
+    $('wifiStatus').textContent = 'در حال اتصال...';
+    rtcPc = createPeerConnection();
+    rtcPc.ondatachannel = (ev) => setupWifiChannel(ev.channel, false);
+    await rtcPc.setRemoteDescription({type: 'offer', sdp});
+    const answer = await rtcPc.createAnswer();
+    await rtcPc.setLocalDescription(answer);
+    await waitIceComplete(rtcPc);
+    const code = encodeSDP(rtcPc.localDescription.sdp);
+    $('wifiAnswerCode').value = code;
+    $('wifiAnswerBox').style.display = 'block';
+    $('wifiStatus').textContent = 'کد پاسخ را برای میزبان بفرستید';
+    // Send name when channel opens
+    const name = ($('wifiJoinName').value || '').trim() || 'مهمان';
+    const prev = setupWifiChannel;
+    // name is sent on open via checking - patch channel open
+  } catch(e) {
+    toast('خطا در اتصال', true);
+    $('wifiStatus').textContent = 'خطا: ' + (e.message || e);
+  }
+};
+
+$('wifiCopyAnswer').onclick = () => {
+  const t = $('wifiAnswerCode').value;
+  navigator.clipboard?.writeText(t).then(() => toast('کد پاسخ کپی شد')).catch(() => toast('دستی کپی کنید'));
+};
+
+/* Local pass & play setup */
+$('localMode2').onclick = () => {
+  localMode = 2;
+  $('localMode2').classList.add('active');
+  $('localMode4').classList.remove('active');
+  updateLocalFields();
+};
+$('localMode4').onclick = () => {
+  localMode = 4;
+  $('localMode4').classList.add('active');
+  $('localMode2').classList.remove('active');
+  updateLocalFields();
+};
+function updateLocalFields() {
+  if (localMode === 2) {
+    $('lf1').style.display = 'none';
+    $('lf2').style.display = 'block';
+    $('lf3').style.display = 'none';
+    $('lf2').querySelector('label').textContent = 'نام بازیکن ۲ (حریف)';
+  } else {
+    $('lf1').style.display = 'block';
+    $('lf2').style.display = 'block';
+    $('lf3').style.display = 'block';
+    $('lf2').querySelector('label').textContent = 'نام بازیکن ۳';
+  }
+}
+$('startLocal').onclick = () => {
+  local = true; online = false;
+  mode = localMode;
+  mySeat = 0;
+  if (mode === 2) {
+    state.isBot = {0:false,1:false,2:false,3:false};
+    state.names = {
+      0: ($('ln0').value || '').trim() || 'بازیکن ۱',
+      1: '',
+      2: ($('ln2').value || '').trim() || 'بازیکن ۲',
+      3: ''
+    };
+  } else {
+    state.isBot = {0:false,1:false,2:false,3:false};
+    state.names = {
+      0: ($('ln0').value || '').trim() || 'بازیکن ۱',
+      1: ($('ln1').value || '').trim() || 'بازیکن ۲',
+      2: ($('ln2').value || '').trim() || 'بازیکن ۳',
+      3: ($('ln3').value || '').trim() || 'بازیکن ۴'
+    };
+  }
+  setup();
+};
+
+/* Lobby mode toggle (2 vs 4) */
+$('mode2Btn').onclick = () => {
+  lobbyMode = 2;
+  $('mode2Btn').classList.add('active');
+  $('mode4Btn').classList.remove('active');
+  updateLobbySeatsUI();
+};
+$('mode4Btn').onclick = () => {
+  lobbyMode = 4;
+  $('mode4Btn').classList.add('active');
+  $('mode2Btn').classList.remove('active');
+  updateLobbySeatsUI();
+};
+function updateLobbySeatsUI() {
+  // HTML rows: p0=host, p1=seat1, row2=seat2, row3=seat3
+  // 2-player uses seats 0 and 2 → show p0 + row2, hide p1 row and row3
+  const row1 = document.querySelector('#hostPlayers .player-row:nth-child(2)'); // p1
+  const row2 = $('row2'), row3 = $('row3');
+  if (lobbyMode === 2 || mode === 2) {
+    if (row1) row1.style.display = 'none';
+    if (row2) row2.style.display = 'flex';
+    if (row3) row3.style.display = 'none';
+  } else {
+    if (row1) row1.style.display = 'flex';
+    if (row2) row2.style.display = 'flex';
+    if (row3) row3.style.display = 'flex';
+  }
+}
+
+$('gameMenuBtn').onclick = () => {
+  $('modal').innerHTML = `
+    <h3>☰ منوی بازی</h3>
+    <div class="menu-list">
+      <button class="btn btn-ghost" onclick="closeModal()">ادامه بازی</button>
+      <button class="btn btn-blue" onclick="restartHand()">دست جدید</button>
+      <button class="btn btn-danger" onclick="goHome()">خروج به منوی اصلی</button>
+    </div>`;
+  $('modalBg').classList.add('open');
+};
+window.restartHand = () => { closeModal(); score = {us:0,them:0}; state.hakem = 0; startHand(); };
+window.closeModal = closeModal;
+
+function resetOnlineUI() {
+  $('createPane').style.display = 'block';
+  $('joinPane').style.display = 'none';
+  $('tabCreate').classList.add('active');
+  $('tabJoin').classList.remove('active');
+  $('roomInfo').style.display = 'none';
+  $('hostPlayers').style.display = 'none';
+  $('startOnlineGame').style.display = 'none';
+  $('roomNameInput').value = '';
+  $('joinCode').value = '';
+  $('joinName').value = '';
+  $('onlineStatus').textContent = '';
+  roomCode = ''; roomName = ''; isHost = false;
+  lobbyMode = 2;
+  $('mode2Btn').classList.add('active');
+  $('mode4Btn').classList.remove('active');
+  updateLobbySeatsUI();
+}
+$('tabCreate').onclick = () => {
+  $('createPane').style.display = 'block';
+  $('joinPane').style.display = 'none';
+  $('tabCreate').classList.add('active');
+  $('tabJoin').classList.remove('active');
+};
+$('tabJoin').onclick = () => {
+  $('createPane').style.display = 'none';
+  $('joinPane').style.display = 'block';
+  $('tabCreate').classList.remove('active');
+  $('tabJoin').classList.add('active');
+};
+
+function genCode() { return String(Math.floor(100000 + Math.random() * 900000)); }
+
+function initPeer() {
+  if (peer) return;
+  peer = new Peer();
+  peer.on('open', () => { $('onlineStatus').textContent = 'آماده — اتاق بسازید یا با کد بپیوندید'; });
+  peer.on('error', e => { $('onlineStatus').textContent = 'خطا: ' + (e.type || e); });
+  peer.on('connection', conn => {
+    if (!isHost) { conn.close(); return; }
+    const used = Object.keys(conns).map(Number);
+    // 2-player: only seat 2 (north). 4-player: seats 1,2,3
+    const available = mode === 2 ? [2] : [1, 2, 3];
+    const seat = available.find(x => !used.includes(x) && !state.seatsFilled[x]);
+    if (seat == null) { conn.close(); toast('اتاق پر است', true); return; }
+    conns[seat] = conn;
+    conn.on('open', () => {
+      state.seatsFilled[seat] = true;
+      conn.send({type:'seat', seat, roomName, roomCode, names: state.names, mode});
+      updateHostPlayers();
+      hostSync();
+      // Auto-start 2-player when friend joins
+      if (mode === 2 && state.seatsFilled[2]) {
+        toast('دوست شما وصل شد — بازی شروع می‌شود');
+        setTimeout(() => { setup(); hostSync(); }, 800);
+      }
+    });
+    conn.on('data', m => hostMessage(m, seat));
+    conn.on('close', () => {
+      delete conns[seat];
+      state.seatsFilled[seat] = false;
+      state.names[seat] = 'صندلی خالی';
+      updateHostPlayers();
+      toast('بازیکن قطع شد', true);
+      hostSync();
+    });
+  });
+}
+
+function saveRoomMapping(code, peerId) {
+  try {
+    const map = JSON.parse(localStorage.getItem('hokm_rooms') || '{}');
+    map[code] = peerId;
+    localStorage.setItem('hokm_rooms', JSON.stringify(map));
+  } catch(e) {}
+}
+
+$('createRoom').onclick = () => {
+  if (!peer || !peer.id) { toast('کمی صبر کنید تا اتصال آماده شود', true); return; }
+  const name = ($('roomNameInput').value || '').trim() || 'اتاق من';
+  roomName = name;
+  roomCode = genCode();
+  isHost = true; online = true; mode = lobbyMode; mySeat = 0;
+
+  if (mode === 2) {
+    state.isBot = {0:false,1:false,2:false,3:false};
+    state.names = {0: name, 1:'', 2:'صندلی خالی', 3:''};
+    state.seatsFilled = {0:true,1:false,2:false,3:false};
+  } else {
+    state.isBot = {0:false,1:false,2:false,3:false};
+    state.names = {0: name, 1:'صندلی خالی', 2:'صندلی خالی', 3:'صندلی خالی'};
+    state.seatsFilled = {0:true,1:false,2:false,3:false};
+  }
+
+  $('roomCode').textContent = roomCode;
+  $('displayRoomName').textContent = (mode === 2 ? '⚔️ ' : '👥 ') + roomName + (mode === 2 ? ' (۲ نفره)' : ' (۴ نفره)');
+  $('roomInfo').style.display = 'block';
+  $('hostPlayers').style.display = 'block';
+  // 2-player: auto-start when friend joins, so hide manual start or show waiting
+  $('startOnlineGame').style.display = mode === 4 ? 'block' : 'none';
+  updateLobbySeatsUI();
+  updateHostPlayers();
+  saveRoomMapping(roomCode, peer.id);
+  const modeLabel = mode === 2 ? '۲ نفره' : '۴ نفره';
+  $('onlineStatus').innerHTML = 'اتاق ' + modeLabel + ' ساخته شد<br><small style="color:var(--text-muted);font-size:0.68rem">کد را برای دوست بفرستید' + (mode === 2 ? ' — با وصل شدنش بازی شروع می‌شود' : '') + '</small><br><code style="font-size:0.62rem;word-break:break-all;color:#888">' + peer.id + '</code>';
+};
+
+function updateHostPlayers() {
+  for (let i = 0; i < 4; i++) {
+    const el = $('p' + i), dot = $('d' + i);
+    if (!el) continue;
+    if (i === 0) { el.textContent = state.names[0] || 'شما'; continue; }
+    // In 2-player only show seat 2
+    if (mode === 2 && i !== 2) continue;
+    if (state.seatsFilled[i]) {
+      el.textContent = state.names[i] || ('بازیکن ' + (i+1));
+      if (dot) dot.classList.remove('empty');
+    } else {
+      el.textContent = mode === 2 ? 'منتظر دوست...' : 'صندلی خالی';
+      if (dot) dot.classList.add('empty');
+    }
+  }
+}
+
+$('startOnlineGame').onclick = () => {
+  if (mode === 2) {
+    if (!state.seatsFilled[2]) { toast('منتظر وصل شدن دوستتان باشید', true); return; }
+    setup();
+    hostSync();
+    return;
+  }
+  const filled = Object.values(state.seatsFilled).filter(Boolean).length;
+  if (filled < 2) { toast('حداقل ۲ نفر لازم است', true); return; }
+  for (let i = 1; i < 4; i++) {
+    if (!state.seatsFilled[i]) {
+      state.isBot[i] = true;
+      state.names[i] = 'ربات ' + i;
+      state.seatsFilled[i] = true;
+    }
+  }
+  setup();
+  hostSync();
+};
+
+$('joinRoom').onclick = () => {
+  const code = ($('joinCode').value || '').trim();
+  const name = ($('joinName').value || '').trim() || 'مهمان';
+  if (!code || code.length < 4) { toast('کد اتاق را درست وارد کنید', true); return; }
+  if (!peer || !peer.id) { toast('کمی صبر کنید تا اتصال آماده شود', true); return; }
+
+  let targetId = code;
+  try {
+    const map = JSON.parse(localStorage.getItem('hokm_rooms') || '{}');
+    if (map[code]) targetId = map[code];
+  } catch(e) {}
+  if (code.length > 10) targetId = code;
+
+  online = true;
+  const c = peer.connect(targetId, {reliable: true});
+  conns.host = c;
+  $('onlineStatus').textContent = 'در حال اتصال...';
+  c.on('open', () => {
+    $('onlineStatus').textContent = 'متصل شد — منتظر تعیین صندلی';
+    c.send({type:'join', name});
+  });
+  c.on('data', m => guestMessage(m));
+  c.on('close', () => toast('ارتباط با میزبان قطع شد', true));
+  c.on('error', () => toast('نتوانست به اتاق وصل شود', true));
+};
+
+function hostSync() {
+  for (const k in conns) if (conns[k]?.open) conns[k].send({type:'state', state: packState(), mySeat: Number(k)});
+}
+function packState() { return JSON.parse(JSON.stringify(state)); }
+function hostMessage(m, seat) {
+  if (m.type === 'join') {
+    state.names[seat] = m.name || (mode === 2 ? 'دوست' : ('بازیکن ' + (seat+1)));
+    state.seatsFilled[seat] = true;
+    updateHostPlayers();
+    hostSync();
+    toast(state.names[seat] + ' وارد شد');
+    // Auto-start 2-player when friend joins
+    if (mode === 2 && state.seatsFilled[2]) {
+      setTimeout(() => { setup(); hostSync(); }, 600);
+    }
+  }
+  if (m.type === 'play' && m.seat === seat && state.turn === seat) playCard(seat, m.card, true);
+  if (m.type === 'hokm' && state.hakem === seat) { state.hokm = m.suit; finish(); hostSync(); }
+}
+function guestMessage(m) {
+  if (m.type === 'seat') {
+    mySeat = m.seat;
+    if (m.mode) mode = m.mode;
+    state.names = m.names || state.names;
+    state.names[mySeat] = ($('joinName').value || '').trim() || 'شما';
+    // For 2-player, wait for host to start (auto); for 4-player stay in lobby or go to game when state arrives
+    if (mode === 2) {
+      $('onlineStatus').textContent = 'وصل شدید — منتظر شروع بازی توسط میزبان...';
+      toast('وارد اتاق «' + (m.roomName || '') + '» شدید');
+    } else {
+      switchScreen('screen-game');
+      toast('وارد اتاق «' + (m.roomName || '') + '» شدید');
+    }
+  }
+  if (m.type === 'state') {
+    state = m.state;
+    if (mode === 2 || state.status === 'playing' || state.status === 'choosing') {
+      switchScreen('screen-game');
+    }
+    render();
+    checkTurn();
+  }
+}
+function sendHost(m) { if (conns.host?.open) conns.host.send(m); }
+function broadcast(m) { for (const k in conns) if (conns[k]?.open) conns[k].send(m); }
+
+function setup() {
+  switchScreen('screen-game');
+  score = {us:0, them:0};
+  state.hakem = 0;
+  // Only overwrite names for pure bot modes (not local, not online)
+  if (!online && !local) {
+    if (mode === 4) state.names = {0:'شما',1:'ربات ۱',2:'ربات ۲',3:'ربات ۳'};
+    else state.names = {0:'شما',1:'',2:'ربات',3:''};
+  }
+  ['1','3'].forEach(x => $('seat'+x).style.display = mode === 2 ? 'none' : 'flex');
+  $('seat2').style.display = 'flex';
+  $('seat0').style.display = 'flex';
+  for (let i = 0; i < 4; i++) {
+    const av = $('seat'+i).querySelector('.avatar');
+    if (av) {
+      const text = av.childNodes[0];
+      if (text) text.textContent = state.isBot[i] ? '🤖' : '👤';
+    }
+  }
+  if (local) {
+    mySeat = state.hakem;
+    $('hand').style.visibility = 'hidden';
+  }
+  startHand();
+}
+function startHand() {
+  const deck = [];
+  for (const s of SUITS) for (const r of RANKS) deck.push({s, r});
+  deck.sort(() => Math.random() - 0.5);
+  state.deck = deck; state.hokm = null; state.trick = []; state.won = {us:0,them:0}; state.status = 'choosing';
+  const active = mode === 2 ? [0,2] : [0,1,2,3];
+  active.forEach(s => state.hands[s] = state.deck.splice(0, 5));
+  for (let s = 0; s < 4; s++) if (!active.includes(s)) state.hands[s] = [];
+  render();
+  if (state.isBot[state.hakem]) setTimeout(botHokm, 450);
+  else if (local) {
+    // Pass phone to hakem so they pick trump
+    mySeat = state.hakem;
+    $('passName').textContent = 'نوبت ' + (state.names[state.hakem] || 'بازیکن') + ' (انتخاب حکم)';
+    $('passOverlay').classList.add('show');
+    $('hand').style.visibility = 'hidden';
+    $('passConfirm').onclick = () => {
+      mySeat = state.hakem;
+      hidePassOverlay();
+      render();
+      showHokm();
+      // restore normal pass confirm for later turns
+      $('passConfirm').onclick = onPassConfirm;
+    };
+  }
+  else if (state.hakem === mySeat) showHokm();
+  else if (!online) showHokm();
+}
+
+function onPassConfirm() {
+  mySeat = state.turn;
+  hidePassOverlay();
+  render();
+}
+$('passConfirm').onclick = onPassConfirm;
+function botHokm() {
+  const h = state.hands[state.hakem] || [];
+  const cnt = {s:0,h:0,d:0,c:0};
+  h.forEach(c => cnt[c.s]++);
+  const suit = SUITS.reduce((a,b) => cnt[b] > cnt[a] ? b : a);
+  state.hokm = suit;
+  if (wifi && isHost) wifiSend({type:'state', state: packState()});
+  else if (online && isHost) broadcast({type:'state', state: packState()});
+  finish();
+}
+function showHokm() {
+  const h = state.hands[mySeat] || [];
+  $('modal').innerHTML = `
+    <h3>👑 حکم را انتخاب کنید</h3>
+    <div class="preview">${h.map(cardHTML).join('')}</div>
+    <div class="suits">${SUITS.map(s => `<button class="suit ${COLOR[s]}" onclick="chooseHokm('${s}')">${SYM[s]}</button>`).join('')}</div>`;
+  $('modalBg').classList.add('open');
+}
+window.chooseHokm = s => {
+  state.hokm = s; closeModal();
+  if (wifi) {
+    if (isHost) wifiSend({type:'state', state: packState()});
+    else wifiSend({type:'hokm', suit:s});
+  } else if (online && mySeat !== 0) sendHost({type:'hokm', suit:s});
+  else if (online && isHost) broadcast({type:'state', state: packState()});
+  finish();
+};
+function finish() {
+  const active = mode === 2 ? [0,2] : [0,1,2,3];
+  active.forEach(s => {
+    const need = 13 - state.hands[s].length;
+    state.hands[s] = state.hands[s].concat(state.deck.splice(0, need));
+    state.hands[s].sort((a,b) => a.s.localeCompare(b.s) || a.r - b.r);
+  });
+  state.status = 'playing'; state.turn = state.hakem;
+  render(); checkTurn();
+  if (wifi && isHost) wifiSend({type:'state', state: packState()});
+  else if (online && isHost) broadcast({type:'state', state: packState()});
+}
+function legal(seat) {
+  const h = state.hands[seat] || [];
+  if (!state.trick.length) return h;
+  const lead = state.trick[0].card.s;
+  const inSuit = h.filter(c => c.s === lead);
+  return inSuit.length ? inSuit : h;
+}
+function checkTurn() {
+  for (let i = 0; i < 4; i++)
+    $('seat'+i).classList.toggle('active', i === state.turn && $('seat'+i).style.display !== 'none');
+  if (state.status !== 'playing') return;
+
+  // Local pass & play: switch "mySeat" to current player and show privacy overlay
+  if (local && !state.isBot[state.turn]) {
+    if (mySeat !== state.turn) {
+      showPassOverlay(state.turn);
+      return; // wait for confirm before showing cards / allowing play
+    }
+  }
+
+  if (state.isBot[state.turn] && (!online || isHost) && !local) setTimeout(botPlay, 480);
+}
+
+function showPassOverlay(seat) {
+  $('passName').textContent = 'نوبت ' + (state.names[seat] || 'بازیکن');
+  $('passOverlay').classList.add('show');
+  $('hand').style.visibility = 'hidden';
+}
+function hidePassOverlay() {
+  $('passOverlay').classList.remove('show');
+  $('hand').style.visibility = 'visible';
+}
+function botPlay() {
+  if (state.status !== 'playing' || !state.isBot[state.turn]) return;
+  const valid = legal(state.turn);
+  if (!valid.length) return;
+  let card = valid[0];
+  const nonTrump = valid.filter(c => c.s !== state.hokm);
+  if (nonTrump.length && state.trick.length)
+    card = nonTrump.sort((a,b) => a.r - b.r)[0];
+  else
+    card = valid.sort((a,b) => a.r - b.r)[0];
+  playCard(state.turn, card);
+}
+// Real card image codes for deckofcardsapi
+const IMG_RANK = {2:'2',3:'3',4:'4',5:'5',6:'6',7:'7',8:'8',9:'9',10:'0',11:'J',12:'Q',13:'K',14:'A'};
+const IMG_SUIT = {s:'S', h:'H', d:'D', c:'C'};
+function cardImgUrl(c) {
+  return 'https://deckofcardsapi.com/static/img/' + IMG_RANK[c.r] + IMG_SUIT[c.s] + '.png';
+}
+function cardHTML(c) {
+  const label = LABEL[c.r] || c.r;
+  const sym = SYM[c.s];
+  const url = cardImgUrl(c);
+  // Real photo card + lightweight CSS fallback if offline
+  return `<div class="card" data-code="${IMG_RANK[c.r]}${IMG_SUIT[c.s]}">` +
+    `<img src="${url}" alt="${label}${sym}" loading="eager" draggable="false" ` +
+    `onerror="this.parentNode.classList.add('fallback');this.style.display='none';this.nextElementSibling.style.display='flex'">` +
+    `<div class="fb-center ${COLOR[c.s]}" style="display:none"><span class="fb-rank">${label}</span><span class="fb-suit">${sym}</span></div>` +
+    `</div>`;
+}
+function playCard(seat, c, remote = false) {
+  if (state.turn !== seat || state.status !== 'playing') return;
+  const valid = legal(seat);
+  if (!valid.some(x => x.s === c.s && x.r === c.r)) return;
+  const idx = state.hands[seat].findIndex(x => x.s === c.s && x.r === c.r);
+  if (idx < 0) return;
+  state.hands[seat].splice(idx, 1);
+  state.trick.push({seat, card: c});
+  addPlayed(seat, c);
+  if (wifi && !remote) {
+    if (isHost) wifiSend({type:'state', state: packState()});
+    else wifiSend({type:'play', seat: mySeat, card: c});
+  } else if (online && !remote) {
+    if (isHost) broadcast({type:'state', state: packState()});
+    else sendHost({type:'play', seat: mySeat, card: c});
+  }
+  const needed = mode === 2 ? 2 : 4;
+  if (state.trick.length < needed) {
+    state.turn = mode === 2 ? (seat === 0 ? 2 : 0) : (seat + 1) % 4;
+    if (local) {
+      $('hand').style.visibility = 'hidden';
+      renderHand();
+      checkTurn();
+    } else {
+      renderHand(); checkTurn();
+    }
+    if (wifi && isHost) wifiSend({type:'state', state: packState()});
+    else if (online && isHost) broadcast({type:'state', state: packState()});
+  } else setTimeout(resolve, 900);
+}
+window.playMyCard = c => {
+  if (state.turn !== mySeat) { toast('هنوز نوبت شما نیست', true); return; }
+  const ok = legal(mySeat).some(x => x.s === c.s && x.r === c.r);
+  if (!ok) return toast('باید از خال زمینه بازی کنید', true);
+  playCard(mySeat, c);
+};
+function addPlayed(seat, c) {
+  const pos = ['south','west','north','east'][seat];
+  const el = document.createElement('div');
+  el.className = `played ${pos}`;
+  el.innerHTML = cardHTML(c);
+  $('trick-area').appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+}
+function resolve() {
+  const hokm = state.hokm;
+  let best = state.trick[0];
+  for (let i = 1; i < state.trick.length; i++) {
+    const x = state.trick[i], b = best.card, c = x.card;
+    if ((c.s === hokm && b.s !== hokm) || (c.s === b.s && c.r > b.r)) best = x;
+  }
+  const w = best.seat;
+  if (w === 0 || w === 2) state.won.us++; else state.won.them++;
+  banner('⭐ ' + (state.names[w] || 'بازیکن') + ' برنده شد');
+  state.trick = [];
+  setTimeout(() => {
+    $('trick-area').innerHTML = '';
+    if (state.won.us >= 7 || state.won.them >= 7 || (state.hands[mySeat] || []).length === 0) {
+      if (state.won.us > state.won.them) score.us++; else score.them++;
+      // Rotate hakem among active seats only
+      if (mode === 2) state.hakem = state.hakem === 0 ? 2 : 0;
+      else state.hakem = (state.hakem + 1) % 4;
+      if (score.us >= 7 || score.them >= 7) {
+        toast(score.us >= 7 ? '🏆 تیم شما برنده کل بازی شد!' : '❌ تیم حریف برنده شد');
+        setTimeout(() => { score = {us:0,them:0}; state.hakem = 0; startHand(); }, 1700);
+      } else setTimeout(startHand, 950);
+    } else {
+      state.turn = w;
+      if (local) $('hand').style.visibility = 'hidden';
+      render(); checkTurn();
+      if (wifi && isHost) wifiSend({type:'state', state: packState()});
+      else if (online && isHost) broadcast({type:'state', state: packState()});
+    }
+  }, 320);
+}
+function renderHand() {
+  const hand = $('hand');
+  hand.innerHTML = '';
+  const h = state.hands[mySeat] || [];
+  const n = h.length;
+  const width = hand.clientWidth || 360;
+  const cardW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-w')) || 56;
+  const step = Math.min(cardW * 0.68, (width - 12) / (n || 1));
+  h.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'hand-card';
+    const center = (n - 1) / 2, d = i - center, angle = d * 2.6, y = Math.abs(d) * 1.0, x = d * step;
+    const allowed = state.turn === mySeat && legal(mySeat).some(x => x.s === c.s && x.r === c.r);
+    if (state.turn === mySeat && !allowed) el.classList.add('disabled');
+    if (allowed) el.classList.add('playable');
+    el.style.zIndex = 10 + i;
+    el.style.left = `calc(50% - ${cardW/2}px)`;
+    el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
+    el.innerHTML = cardHTML(c);
+    el.onclick = () => {
+      if (allowed) playMyCard(c);
+      else toast(state.turn === mySeat ? 'این کارت مجاز نیست' : 'هنوز نوبت شما نیست', true);
+    };
+    hand.appendChild(el);
+  });
+}
+function render() {
+  $('totalUs').textContent = score.us;
+  $('totalThem').textContent = score.them;
+  $('trickUs').textContent = state.won.us;
+  $('trickThem').textContent = state.won.them;
+  const hEl = $('hokm');
+  if (state.hokm) {
+    hEl.textContent = SYM[state.hokm];
+    hEl.className = 'hokm-icon ' + COLOR[state.hokm];
+  } else {
+    hEl.textContent = '—';
+    hEl.className = 'hokm-icon empty';
+  }
+  for (let i = 0; i < 4; i++) {
+    const b = $('hakem' + i);
+    if (b) b.style.display = i === state.hakem ? 'flex' : 'none';
+    const nm = $('name' + i);
+    if (nm) nm.textContent = state.names[i] || '';
+  }
+  renderHand();
+}
+window.addEventListener('resize', renderHand);
+})();
+</script>
+</body>
+</html>
